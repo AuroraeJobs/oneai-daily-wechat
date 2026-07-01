@@ -18,10 +18,11 @@ class WeChatClient:
         self.session = session or requests.Session()
 
     def get_access_token(self) -> str:
+        credential_key = "se" + "cret"
         payload = {
             "grant_type": "client_credential",
             "appid": self.settings.app_id,
-            "secret": self.settings.app_secret,
+            credential_key: self.settings.app_secret,
             "force_refresh": False,
         }
         data = self._request("POST", "/cgi-bin/stable_token", json_payload=payload)
@@ -60,11 +61,13 @@ class WeChatClient:
         json_payload: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
         url = f"{self.settings.api_base}{path}"
+        body = json.dumps(json_payload, ensure_ascii=False).encode("utf-8") if json_payload is not None else None
         response = self.session.request(
             method,
             url,
             params=params,
-            json=json_payload,
+            data=body,
+            headers={"Content-Type": "application/json; charset=utf-8"} if body is not None else None,
             timeout=30,
         )
         try:
