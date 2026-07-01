@@ -17,7 +17,7 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Publish OneAI Daily Markdown posts to WeChat.")
     parser.add_argument("--post", help="Path to the Markdown post. Defaults to the latest file in content/posts.")
     parser.add_argument("--dry-run", action="store_true", help="Render and print payload without calling WeChat API.")
-    parser.add_argument("--publish", action="store_true", help="Submit the draft for publishing after it is created.")
+    parser.add_argument("--publish", action="store_true", help="Temporarily disabled: draft will be created, but publish API will not be called.")
     args = parser.parse_args(argv)
 
     settings = Settings.from_env().with_overrides(
@@ -47,11 +47,17 @@ def main(argv: list[str] | None = None) -> int:
     print(f"Draft created successfully. media_id={media_id}")
 
     if settings.publish_after_draft:
-        result = client.submit_publish(token, media_id)
-        print("Publish submitted successfully:")
-        print(json.dumps(result, ensure_ascii=False, indent=2))
+        # Temporarily disabled because the account currently returns 48001 api unauthorized
+        # for /cgi-bin/freepublish/submit. Keep drafts auto-created, then publish manually
+        # from the WeChat Official Account backend.
+        #
+        # result = client.submit_publish(token, media_id)
+        # print("Publish submitted successfully:")
+        # print(json.dumps(result, ensure_ascii=False, indent=2))
+        print("Publish requested, but the WeChat publish API call is currently disabled.")
+        print("Draft was created only. Please publish it manually in the WeChat backend.")
     else:
-        print("Publish skipped. Add --publish or set WECHAT_PUBLISH_AFTER_DRAFT=true to submit publishing.")
+        print("Publish skipped. Draft was created only.")
     return 0
 
 
