@@ -1,0 +1,78 @@
+name: Publish OneAI Daily to WeChat
+
+on:
+  schedule:
+    # GitHub Actions cron uses UTC. 23:30 UTC = 07:30 Asia/Shanghai next day.
+    - cron: "30 23 * * *"
+  workflow_dispatch:
+    inputs:
+      post:
+        description: "Markdown post path, for example content/posts/2026-07-01-sample.md"
+        required: false
+        default: ""
+      dry_run:
+        description: "Render only and do not call WeChat API"
+        required: true
+        default: "true"
+        type: choice
+        options:
+          - "true"
+          - "false"
+      publish:
+        description: "Submit the draft for publishing"
+        required: true
+        default: "false"
+        type: choice
+        options:
+          - "true"
+          - "false"
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      TZ: Asia/Shanghai
+      WECHAT_APP_ID: ${{ secrets.WECHAT_APP_ID }}
+      WECHAT_APP_SECRET: ${{ secrets.WECHAT_APP_SECRET }}
+      WECHAT_THUMB_MEDIA_ID: ${{ secrets.WECHAT_THUMB_MEDIA_ID }}
+      WECHAT_AUTHOR: ${{ vars.WECHAT_AUTHOR || 'OneAI' }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .
+
+      - name: Publish to WeChat
+        shell: bash
+        run: |
+          ARGS=()
+
+          if [[ -n "${{ github.event.inputs.post }}" ]]; then
+            ARGS+=(--post "${{ github.event.inputs.post }}")
+          fi
+
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            if [[ "${{ inputs.dry_run }}" == "true" ]]; then
+              ARGS+=(--dry-run)
+            fi
+            if [[ "${{ inputs.publish }}" == "true" ]]; then
+              ARGS+=(--publish)
+            fi
+          else
+            ARGS+=(--publish)
+          fi
+
+          python -m wechat_publisher.publish "${ARGS[@]}"
