@@ -68,14 +68,16 @@ def render_markdown_article(
 ) -> RenderedArticle:
     text = _decode_unicode_escape_literals(path.read_text(encoding="utf-8"))
     meta, body = parse_front_matter(text)
+
+    title = meta.get("title") or _extract_title(body) or path.stem
+    body = _strip_leading_h1(body)
+
     html = markdown.markdown(
         body,
         extensions=["extra", "sane_lists", "smarty"],
         output_format="html5",
     )
     content = wrap_for_wechat(html)
-
-    title = meta.get("title") or _extract_title(body) or path.stem
     digest = meta.get("digest") or _build_digest(html)
 
     return RenderedArticle(
@@ -92,18 +94,58 @@ def render_markdown_article(
 
 
 def wrap_for_wechat(html: str) -> str:
+    html = _style_wechat_blocks(html)
+
     footer = ""
     if _FOOTER_TEXT not in html:
         footer = (
-            '<p style="margin-top:24px;color:#8a8f98;font-size:13px;">'
+            '<p style="margin:30px 0 0;color:#8a8f98;font-size:13px;line-height:1.7;">'
             f"{_FOOTER_TEXT}</p>\n"
         )
+
     return (
-        '<section style="font-size:16px;line-height:1.75;color:#1f2328;">\n'
+        '<section style="font-size:17px;line-height:1.9;color:#1f2328;">\n'
         f"{html}\n"
         f"{footer}"
         "</section>"
     )
+
+
+def _style_wechat_blocks(html: str) -> str:
+    replacements = [
+        (
+            r"<h1>",
+            '<h1 style="margin:0 0 24px;font-size:28px;line-height:1.35;font-weight:700;color:#111827;">',
+        ),
+        (
+            r"<h2>",
+            '<h2 style="margin:38px 0 18px;padding-top:4px;font-size:22px;line-height:1.45;font-weight:700;color:#111827;">',
+        ),
+        (
+            r"<h3>",
+            '<h3 style="margin:30px 0 14px;font-size:19px;line-height:1.5;font-weight:700;color:#111827;">',
+        ),
+        (
+            r"<p>",
+            '<p style="margin:16px 0;line-height:1.95;color:#1f2328;">',
+        ),
+        (
+            r"<blockquote>",
+            '<blockquote style="margin:24px 0;padding:10px 0 10px 16px;border-left:4px solid #d1d5db;color:#4b5563;background:#f9fafb;">',
+        ),
+        (
+            r"<hr\s*/?>",
+            '<hr style="border:none;border-top:1px solid #e5e7eb;margin:34px 0;">',
+        ),
+    ]
+
+    for pattern, replacement in replacements:
+        html = re.sub(pattern, replacement, html)
+    return html
+
+
+def _strip_leading_h1(body: str) -> str:
+    return re.sub(r"\A\s*#\s+.+?(?:\n+|\Z)", "", body, count=1)
 
 
 def _extract_title(body: str) -> str:
