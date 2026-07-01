@@ -125,7 +125,7 @@ show_cover_pic: 0
 
 - `title`：公众号标题；缺省时使用正文第一个一级标题
 - `author`：作者；缺省时使用环境变量 `WECHAT_AUTHOR`
-- `digest`：摘要；缺省时从正文首段截取
+- `digest`：摘要；缺省时从正文首段截取。代码会按 UTF-8 字节自动截断到 120B 内；手写摘要建议控制在 35 个中文左右，避免微信返回 `45004 description size out of limit`
 - `cover_media_id`：单篇文章封面素材 ID；缺省时使用 `WECHAT_THUMB_MEDIA_ID`
 - `content_source_url`：原文链接，可留空
 - `need_open_comment`：是否打开评论，`0` 或 `1`
