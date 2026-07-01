@@ -10,6 +10,7 @@ import markdown
 _FRONT_MATTER_RE = re.compile(r"\A---\s*\n(?P<meta>.*?)\n---\s*\n(?P<body>.*)\Z", re.DOTALL)
 _HEADING_RE = re.compile(r"^#\s+(?P<title>.+?)\s*$", re.MULTILINE)
 _TAG_RE = re.compile(r"<[^>]+>")
+_UNICODE_ESCAPE_RE = re.compile(r"\\([uU])([0-9a-fA-F]{4,8})")
 _MAX_DIGEST_BYTES = 120
 
 
@@ -64,7 +65,7 @@ def render_markdown_article(
     default_need_open_comment: int = 0,
     default_only_fans_can_comment: int = 0,
 ) -> RenderedArticle:
-    text = path.read_text(encoding="utf-8")
+    text = _decode_unicode_escape_literals(path.read_text(encoding="utf-8"))
     meta, body = parse_front_matter(text)
     html = markdown.markdown(
         body,
@@ -108,6 +109,22 @@ def _build_digest(html: str) -> str:
     text = _TAG_RE.sub(" ", html)
     text = unescape(re.sub(r"\s+", " ", text)).strip()
     return text if text else "OneAI Daily"
+
+
+def _decode_unicode_escape_literals(value: str) -> str:
+    def replace(match: re.Match[str]) -> str:
+        marker = match.group(1)
+        digits = match.group(2)
+        if marker == "u" and len(digits) != 4:
+            return match.group(0)
+        if marker == "U" and len(digits) != 8:
+            return match.group(0)
+        try:
+            return chr(int(digits, 16))
+        except ValueError:
+            return match.group(0)
+
+    return _UNICODE_ESCAPE_RE.sub(replace, value)
 
 
 def _strip_quotes(value: str) -> str:
