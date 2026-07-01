@@ -10,6 +10,7 @@ import markdown
 _FRONT_MATTER_RE = re.compile(r"\A---\s*\n(?P<meta>.*?)\n---\s*\n(?P<body>.*)\Z", re.DOTALL)
 _HEADING_RE = re.compile(r"^#\s+(?P<title>.+?)\s*$", re.MULTILINE)
 _TAG_RE = re.compile(r"<[^>]+>")
+_MAX_DIGEST_BYTES = 120
 
 
 @dataclass(frozen=True)
@@ -78,7 +79,7 @@ def render_markdown_article(
     return RenderedArticle(
         title=_limit(title, 64),
         author=meta.get("author") or default_author,
-        digest=_limit(digest, 120),
+        digest=_limit_utf8_bytes(digest, _MAX_DIGEST_BYTES),
         content=content,
         content_source_url=meta.get("content_source_url", ""),
         thumb_media_id=meta.get("cover_media_id") or meta.get("thumb_media_id") or default_thumb_media_id,
@@ -106,7 +107,7 @@ def _extract_title(body: str) -> str:
 def _build_digest(html: str) -> str:
     text = _TAG_RE.sub(" ", html)
     text = unescape(re.sub(r"\s+", " ", text)).strip()
-    return text[:120] if text else "OneAI Daily"
+    return text if text else "OneAI Daily"
 
 
 def _strip_quotes(value: str) -> str:
@@ -131,3 +132,25 @@ def _limit(value: str, max_chars: int) -> str:
     if len(value) <= max_chars:
         return value
     return value[: max_chars - 1].rstrip() + "…"
+
+
+def _limit_utf8_bytes(value: str, max_bytes: int, suffix: str = "…") -> str:
+    value = value.strip()
+    if len(value.encode("utf-8")) <= max_bytes:
+        return value
+
+    suffix_bytes = suffix.encode("utf-8")
+    budget = max_bytes - len(suffix_bytes)
+    if budget <= 0:
+        return ""
+
+    result: list[str] = []
+    used = 0
+    for char in value:
+        char_bytes = len(char.encode("utf-8"))
+        if used + char_bytes > budget:
+            break
+        result.append(char)
+        used += char_bytes
+
+    return "".join(result).rstrip() + suffix
