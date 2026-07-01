@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "oneai-daily-wechat"
+version = "0.1.0"
+description = "Publish Markdown daily posts to a WeChat Official Account."
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+  "requests>=2.32.0",
+  "python-dotenv>=1.0.1",
+  "markdown>=3.6",
+]
+
+[project.scripts]
+oneai-daily-wechat = "wechat_publisher.publish:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
