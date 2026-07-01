@@ -12,6 +12,7 @@ _HEADING_RE = re.compile(r"^#\s+(?P<title>.+?)\s*$", re.MULTILINE)
 _TAG_RE = re.compile(r"<[^>]+>")
 _UNICODE_ESCAPE_RE = re.compile(r"\\([uU])([0-9a-fA-F]{4,8})")
 _MAX_DIGEST_BYTES = 120
+_FOOTER_TEXT = "由 OneAI Daily 自动发布。"
 
 
 @dataclass(frozen=True)
@@ -91,11 +92,16 @@ def render_markdown_article(
 
 
 def wrap_for_wechat(html: str) -> str:
+    footer = ""
+    if _FOOTER_TEXT not in html:
+        footer = (
+            '<p style="margin-top:24px;color:#8a8f98;font-size:13px;">'
+            f"{_FOOTER_TEXT}</p>\n"
+        )
     return (
         '<section style="font-size:16px;line-height:1.75;color:#1f2328;">\n'
         f"{html}\n"
-        '<p style="margin-top:24px;color:#8a8f98;font-size:13px;">'
-        "由 OneAI Daily 自动发布。</p>\n"
+        f"{footer}"
         "</section>"
     )
 
