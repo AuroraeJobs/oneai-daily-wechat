@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Upload a OneAI Daily markdown article and its local images to WeChat, then create a draft.
 
-Required env vars:
+Required env vars, usually loaded from .env:
   WECHAT_APP_ID
   WECHAT_APP_SECRET
 
@@ -11,7 +11,13 @@ Optional env vars:
   NEED_OPEN_COMMENT=0
   ONLY_FANS_CAN_COMMENT=0
 
+Usage:
+  python scripts/push_wechat_draft.py
+  python scripts/push_wechat_draft.py content/daily/2026-07-02-daily-briefing.md
+
 Notes:
+  - The script automatically loads .env from the project root when present.
+  - If no CLI path or ARTICLE_PATH is provided, it uses the newest markdown file in content/daily.
   - WeChat draft/add requires thumb_media_id, so the cover image is uploaded as a permanent image material.
   - Article body images are uploaded through media/uploadimg and local markdown image paths are replaced with WeChat image URLs.
   - SVG images are converted to PNG before upload because WeChat image APIs are more reliable with PNG/JPG.
@@ -33,6 +39,7 @@ import markdown
 import requests
 import yaml
 from bs4 import BeautifulSoup
+from dotenv import load_dotenv
 
 try:
     import cairosvg
@@ -41,7 +48,10 @@ except Exception:  # pragma: no cover
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_ARTICLE_PATH = "content/daily/2026-07-02-daily-briefing.md"
+DAILY_DIR = REPO_ROOT / "content" / "daily"
+
+# Load local secrets/config first; existing shell env still takes precedence.
+load_dotenv(REPO_ROOT / ".env", override=False)
 
 
 @dataclass
@@ -55,7 +65,37 @@ class WeChatError(RuntimeError):
     pass
 
 
+def find_latest_article() -> Path:
+    if not DAILY_DIR.exists():
+        raise FileNotFoundError(f"Daily content directory not found: {DAILY_DIR}")
+    candidates = sorted(
+        DAILY_DIR.glob("*.md"),
+        key=lambda p: (p.stat().st_mtime, p.name),
+        reverse=True,
+    )
+    if not candidates:
+        raise FileNotFoundError(f"No markdown articles found in {DAILY_DIR}")
+    return candidates[0]
+
+
+def resolve_article_path() -> Path:
+    if len(sys.argv) > 1 and sys.argv[1].strip():
+        raw = sys.argv[1].strip()
+    else:
+        raw = os.getenv("ARTICLE_PATH", "").strip()
+
+    if raw:
+        path = Path(raw)
+        if not path.is_absolute():
+            path = REPO_ROOT / path
+        return path.resolve()
+
+    return find_latest_article().resolve()
+
+
 def load_article(path: Path) -> Article:
+    if not path.exists():
+        raise FileNotFoundError(f"Article not found: {path}")
     text = path.read_text(encoding="utf-8")
     if text.startswith("---"):
         parts = text.split("---", 2)
@@ -218,9 +258,10 @@ def main() -> int:
     app_id = os.getenv("WECHAT_APP_ID")
     app_secret = os.getenv("WECHAT_APP_SECRET")
     if not app_id or not app_secret:
-        raise SystemExit("Missing WECHAT_APP_ID or WECHAT_APP_SECRET")
+        raise SystemExit("Missing WECHAT_APP_ID or WECHAT_APP_SECRET. Add them to .env or export them in your shell.")
 
-    article_path = (REPO_ROOT / os.getenv("ARTICLE_PATH", DEFAULT_ARTICLE_PATH)).resolve()
+    article_path = resolve_article_path()
+    print(f"using article: {article_path.relative_to(REPO_ROOT)}")
     article = load_article(article_path)
 
     access_token = get_access_token(app_id, app_secret)
