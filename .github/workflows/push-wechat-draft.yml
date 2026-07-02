@@ -1,0 +1,36 @@
+name: Push WeChat Draft
+
+on:
+  workflow_dispatch:
+    inputs:
+      article_path:
+        description: "Markdown article path"
+        required: true
+        default: "content/daily/2026-07-02-daily-briefing.md"
+
+jobs:
+  push-draft:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libcairo2 libpango-1.0-0 libpangocairo-1.0-0 libgdk-pixbuf-2.0-0 libffi-dev shared-mime-info
+
+      - name: Install Python dependencies
+        run: pip install -r requirements.txt
+
+      - name: Upload images and create WeChat draft
+        env:
+          WECHAT_APP_ID: ${{ secrets.WECHAT_APP_ID }}
+          WECHAT_APP_SECRET: ${{ secrets.WECHAT_APP_SECRET }}
+          ARTICLE_PATH: ${{ inputs.article_path }}
+        run: python scripts/push_wechat_draft.py
