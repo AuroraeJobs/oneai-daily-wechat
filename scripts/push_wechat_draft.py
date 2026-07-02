@@ -115,12 +115,15 @@ def get_access_token(app_id: str, app_secret: str) -> str:
     return token
 
 
+def is_svg_path(path: Path) -> bool:
+    return path.suffix.lower() in {".svg", ".svgz"}
+
+
 def get_image_mime(path: Path) -> str:
-    suffix = path.suffix.lower()
-    if suffix in {".svg", ".svgz"}:
+    if is_svg_path(path):
         raise WeChatError(
-            "SVG cover/body images are disabled for WeChat publishing. "
-            "Please convert the image to PNG/JPG and set DEFAULT_COVER=assets/brand/oneai-daily-cover.png."
+            "SVG cover images are disabled for WeChat publishing. "
+            "Please use assets/brand/oneai-daily-cover.png as DEFAULT_COVER."
         )
     mime, _ = mimetypes.guess_type(path.name)
     if mime not in {"image/jpeg", "image/png", "image/gif", "image/bmp"}:
@@ -202,8 +205,11 @@ def replace_markdown_images(article: Article, access_token: str) -> str:
     def repl(match: re.Match) -> str:
         alt = match.group(1)
         ref = match.group(2)
+        local_path = resolve_image_path(article.path, ref)
+        if is_svg_path(local_path):
+            print(f"skipped SVG body image: {ref}")
+            return ""
         if ref not in image_cache:
-            local_path = resolve_image_path(article.path, ref)
             image_cache[ref] = upload_body_image(access_token, local_path)
             print(f"uploaded body image: {ref} -> {image_cache[ref]}")
         return f"![{alt}]({image_cache[ref]})"
