@@ -94,6 +94,11 @@ def load_article(path: Path) -> Article:
     return Article(metadata={}, body=text, path=path)
 
 
+def strip_first_h1(md_text: str) -> str:
+    """Remove the first markdown H1 because WeChat template already renders the title."""
+    return re.sub(r"^#\s+.+(?:\n+)?", "", md_text.lstrip(), count=1)
+
+
 def request_json(method: str, url: str, **kwargs) -> dict:
     response = requests.request(method, url, timeout=60, **kwargs)
     try:
@@ -213,7 +218,7 @@ def replace_markdown_images(article: Article, access_token: str) -> str:
 
 
 def markdown_to_wechat_html(md_text: str) -> str:
-    html = markdown.markdown(md_text, extensions=["extra", "sane_lists"])
+    html = markdown.markdown(strip_first_h1(md_text), extensions=["extra", "sane_lists"])
     soup = BeautifulSoup(html, "html.parser")
     for img in soup.find_all("img"):
         img["style"] = "width:100%;height:auto;border-radius:12px;margin:18px 0;display:block;"
