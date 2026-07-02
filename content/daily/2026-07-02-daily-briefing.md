@@ -1,9 +1,9 @@
 ---
-title: "OneAI Daily｜2026-07-02"
+title: "OneAI Daily｜AI 治理、开源模型融资与半导体主线"
 digest: "今日5条"
 author: "OneAI Daily"
 date: "2026-07-02"
-cover: "../../assets/images/2026-07-02/01-ai-governance.svg"
+cover: "../../assets/brand/oneai-daily-cover.png"
 topics:
   - AI & technology
   - business & markets
@@ -16,7 +16,7 @@ topics:
 status: draft
 ---
 
-# OneAI Daily｜2026 年 7 月 2 日
+# OneAI Daily｜AI 治理、开源模型融资与半导体主线
 
 > 5 条重点新闻，覆盖 AI、科技、商业、科学、政策、创业、全球新闻、工程与体育。
 
@@ -69,12 +69,3 @@ Anthropic 发布 “Claude Science”，一个面向科学研究的 AI 工作台
 温网第三日，Djokovic 直落三盘击败 Tsitsipas，Sinner、Medvedev、Gauff、Sabalenka、Osaka 等多位名将也晋级。女单方面，Krejcikova 逆转击败五号种子 Andreeva，成为当日重要冷门之一。
 
 **为什么重要：** 今年温网早轮已呈现“老将状态回升 + 新星受压”的格局，男女单争冠路线正在快速重排。
-
----
-
-## 公众号发布备注
-
-- 建议标题：`OneAI Daily｜AI 治理、开源模型融资与半导体主线`
-- Digest：`今日5条`
-- 封面图：`assets/images/2026-07-02/01-ai-governance.svg`
-- 发布状态：先保存到草稿箱，人工检查后发布。
