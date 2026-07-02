@@ -8,6 +8,7 @@ Required env vars, usually loaded from .env:
 Optional env vars:
   ARTICLE_PATH=content/daily/2026-07-02-daily-briefing.md
   DEFAULT_COVER=assets/brand/oneai-daily-cover.svg
+  USE_ARTICLE_COVER=0
   WECHAT_TEMPLATE=templates/wechat.html
   AUTHOR=OneAI Daily
   NEED_OPEN_COMMENT=0
@@ -59,6 +60,10 @@ class Article:
 
 class WeChatError(RuntimeError):
     pass
+
+
+def env_truthy(name: str, default: str = "0") -> bool:
+    return os.getenv(name, default).strip().lower() in {"1", "true", "yes", "y", "on"}
 
 
 def find_latest_article() -> Path:
@@ -169,16 +174,27 @@ def resolve_image_path(article_path: Path, image_ref: str) -> Path:
 
 
 def resolve_cover_ref(article: Article) -> str:
-    cover = str(article.metadata.get("cover") or "").strip()
-    if cover:
-        return cover
+    """Resolve cover image for WeChat thumb.
+
+    By default, WeChat drafts use the brand cover from DEFAULT_COVER, even if the
+    article front matter has a cover. Set USE_ARTICLE_COVER=1 to restore per-article covers.
+    """
     env_cover = os.getenv("DEFAULT_COVER", DEFAULT_COVER).strip()
+    use_article_cover = env_truthy("USE_ARTICLE_COVER", "0")
+
+    if env_cover and not use_article_cover:
+        return env_cover
+
+    article_cover = str(article.metadata.get("cover") or "").strip()
+    if article_cover:
+        return article_cover
     if env_cover:
         return env_cover
+
     match = re.search(r"!\[[^\]]*\]\(([^)]+)\)", article.body)
     if match:
         return match.group(1)
-    raise WeChatError("No cover found. Set cover in front matter or DEFAULT_COVER in .env")
+    raise WeChatError("No cover found. Set DEFAULT_COVER in .env or cover in front matter")
 
 
 def replace_markdown_images(article: Article, access_token: str) -> str:
