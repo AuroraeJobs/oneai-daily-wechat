@@ -7,7 +7,7 @@ Required env vars, usually loaded from .env:
 
 Optional env vars:
   ARTICLE_PATH=content/daily/2026-07-02-daily-briefing.md
-  DEFAULT_COVER=assets/brand/oneai-daily-cover.svg
+  DEFAULT_COVER=assets/brand/oneai-daily-cover.png
   USE_ARTICLE_COVER=0
   WECHAT_TEMPLATE=templates/wechat.html
   AUTHOR=OneAI Daily
@@ -26,10 +26,9 @@ import re
 import sys
 import json
 import mimetypes
-import tempfile
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, Tuple
+from typing import Dict
 
 import markdown
 import requests
@@ -37,15 +36,10 @@ import yaml
 from bs4 import BeautifulSoup
 from dotenv import load_dotenv
 
-try:
-    import cairosvg
-except Exception:  # pragma: no cover
-    cairosvg = None
-
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 DAILY_DIR = REPO_ROOT / "content" / "daily"
-DEFAULT_COVER = "assets/brand/oneai-daily-cover.svg"
+DEFAULT_COVER = "assets/brand/oneai-daily-cover.png"
 DEFAULT_TEMPLATE = "templates/wechat.html"
 
 load_dotenv(REPO_ROOT / ".env", override=False)
@@ -95,7 +89,6 @@ def load_article(path: Path) -> Article:
 
 
 def strip_first_h1(md_text: str) -> str:
-    """Remove the first markdown H1 because WeChat template already renders the title."""
     return re.sub(r"^#\s+.+(?:\n+)?", "", md_text.lstrip(), count=1)
 
 
@@ -122,48 +115,39 @@ def get_access_token(app_id: str, app_secret: str) -> str:
     return token
 
 
-def as_uploadable_image(path: Path) -> Tuple[Path, str, tempfile.TemporaryDirectory | None]:
-    if path.suffix.lower() == ".svg":
-        if cairosvg is None:
-            raise WeChatError("SVG image found but cairosvg is not installed")
-        tmpdir = tempfile.TemporaryDirectory()
-        out_path = Path(tmpdir.name) / f"{path.stem}.png"
-        cairosvg.svg2png(url=str(path), write_to=str(out_path), output_width=1200, output_height=675)
-        return out_path, "image/png", tmpdir
+def get_image_mime(path: Path) -> str:
+    suffix = path.suffix.lower()
+    if suffix in {".svg", ".svgz"}:
+        raise WeChatError(
+            "SVG cover/body images are disabled for WeChat publishing. "
+            "Please convert the image to PNG/JPG and set DEFAULT_COVER=assets/brand/oneai-daily-cover.png."
+        )
     mime, _ = mimetypes.guess_type(path.name)
     if mime not in {"image/jpeg", "image/png", "image/gif", "image/bmp"}:
-        mime = "image/png"
-    return path, mime, None
+        raise WeChatError(f"Unsupported image type for WeChat: {path}")
+    return mime
 
 
 def upload_body_image(access_token: str, image_path: Path) -> str:
-    upload_path, mime, tmpdir = as_uploadable_image(image_path)
-    try:
-        url = f"https://api.weixin.qq.com/cgi-bin/media/uploadimg?access_token={access_token}"
-        with upload_path.open("rb") as fh:
-            payload = request_json("POST", url, files={"media": (upload_path.name, fh, mime)})
-        img_url = payload.get("url")
-        if not img_url:
-            raise WeChatError(f"No image url returned for {image_path}: {payload}")
-        return img_url
-    finally:
-        if tmpdir:
-            tmpdir.cleanup()
+    mime = get_image_mime(image_path)
+    url = f"https://api.weixin.qq.com/cgi-bin/media/uploadimg?access_token={access_token}"
+    with image_path.open("rb") as fh:
+        payload = request_json("POST", url, files={"media": (image_path.name, fh, mime)})
+    img_url = payload.get("url")
+    if not img_url:
+        raise WeChatError(f"No image url returned for {image_path}: {payload}")
+    return img_url
 
 
 def upload_thumb_material(access_token: str, image_path: Path) -> str:
-    upload_path, mime, tmpdir = as_uploadable_image(image_path)
-    try:
-        url = f"https://api.weixin.qq.com/cgi-bin/material/add_material?access_token={access_token}&type=image"
-        with upload_path.open("rb") as fh:
-            payload = request_json("POST", url, files={"media": (upload_path.name, fh, mime)})
-        media_id = payload.get("media_id")
-        if not media_id:
-            raise WeChatError(f"No media_id returned for cover {image_path}: {payload}")
-        return media_id
-    finally:
-        if tmpdir:
-            tmpdir.cleanup()
+    mime = get_image_mime(image_path)
+    url = f"https://api.weixin.qq.com/cgi-bin/material/add_material?access_token={access_token}&type=image"
+    with image_path.open("rb") as fh:
+        payload = request_json("POST", url, files={"media": (image_path.name, fh, mime)})
+    media_id = payload.get("media_id")
+    if not media_id:
+        raise WeChatError(f"No media_id returned for cover {image_path}: {payload}")
+    return media_id
 
 
 def resolve_image_path(article_path: Path, image_ref: str) -> Path:
@@ -178,13 +162,23 @@ def resolve_image_path(article_path: Path, image_ref: str) -> Path:
     return candidate
 
 
-def resolve_cover_ref(article: Article) -> str:
-    """Resolve cover image for WeChat thumb.
+def resolve_default_cover() -> str:
+    explicit = os.getenv("DEFAULT_COVER", "").strip()
+    if explicit:
+        return explicit
 
-    By default, WeChat drafts use the brand cover from DEFAULT_COVER, even if the
-    article front matter has a cover. Set USE_ARTICLE_COVER=1 to restore per-article covers.
-    """
-    env_cover = os.getenv("DEFAULT_COVER", DEFAULT_COVER).strip()
+    for candidate in (
+        "assets/brand/oneai-daily-cover.png",
+        "assets/brand/oneai-daily-cover.jpg",
+        "assets/brand/oneai-daily-cover.jpeg",
+    ):
+        if (REPO_ROOT / candidate).exists():
+            return candidate
+    return DEFAULT_COVER
+
+
+def resolve_cover_ref(article: Article) -> str:
+    env_cover = resolve_default_cover()
     use_article_cover = env_truthy("USE_ARTICLE_COVER", "0")
 
     if env_cover and not use_article_cover:
