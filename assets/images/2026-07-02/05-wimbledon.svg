@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="675" viewBox="0 0 1200 675">
+  <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#064e3b"/><stop offset="100%" stop-color="#84cc16"/></linearGradient></defs>
+  <rect width="1200" height="675" rx="36" fill="url(#g)"/>
+  <text x="80" y="120" font-family="Arial, Helvetica, sans-serif" font-size="38" fill="#e9ffd0" letter-spacing="4">SPORTS</text>
+  <text x="80" y="260" font-family="Arial, Helvetica, sans-serif" font-size="78" font-weight="700" fill="#ffffff">Wimbledon</text>
+  <text x="80" y="342" font-family="Arial, Helvetica, sans-serif" font-size="42" fill="#f5ffe7">Early rounds heat up</text>
+  <rect x="710" y="150" width="360" height="430" rx="24" fill="none" stroke="#ffffff" stroke-width="10" opacity="0.72"/>
+  <line x1="890" y1="150" x2="890" y2="580" stroke="#ffffff" stroke-width="8" opacity="0.65"/>
+  <line x1="710" y1="365" x2="1070" y2="365" stroke="#ffffff" stroke-width="8" opacity="0.65"/>
+  <circle cx="660" cy="450" r="34" fill="#ffffff" opacity="0.9"/>
+  <path d="M638 428c28 12 45 32 48 63M682 426c-32 14-50 38-54 64" stroke="#064e3b" stroke-width="5" fill="none" opacity="0.7"/>
+  <text x="80" y="585" font-family="Arial, Helvetica, sans-serif" font-size="34" fill="#e9ffd0">Djokovic · Sinner · Gauff · Sabalenka</text>
+</svg>
