@@ -24,8 +24,8 @@ echo "==> Install dependencies"
 python -m pip install --upgrade pip
 pip install -r requirements.txt
 
-echo "==> Generate missing PNG article images"
-python scripts/generate_article_images.py "$ARTICLE_PATH"
+echo "==> Generate or refresh PNG article images"
+FORCE_REGENERATE_IMAGES="${FORCE_REGENERATE_IMAGES:-1}" python scripts/generate_article_images.py "$ARTICLE_PATH"
 
 if ! git diff --quiet -- assets/images content/daily; then
   echo "==> Commit generated images and markdown updates"
