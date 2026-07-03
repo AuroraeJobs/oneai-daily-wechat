@@ -89,9 +89,7 @@ def wrap_text(text: str, font, max_width: int, max_lines: int = 3):
 
 def clean_title(title: str, idx: int) -> str:
     title = re.sub(r"^\s*\d+[\.、]\s*", "", title.strip())
-    # Keep the topic prefix, but remove excessive spaces around separators.
-    title = title.replace(" | ", "｜").replace("｜", "｜")
-    return title
+    return title.replace(" | ", "｜")
 
 
 def resolve(article: Path, ref: str) -> Path:
@@ -137,40 +135,29 @@ def make_card(path: Path, title: str, idx: int):
     font_story = load_font(28, bold=True)
     font_brand = load_font(28, bold=True)
 
-    # Choose a title font that fits a 3-line left text block.
     for size in (56, 52, 48, 44):
         font_title = load_font(size, bold=True)
         title_lines = wrap_text(title, font_title, max_width=700, max_lines=3)
         if len(title_lines) <= 3:
             break
 
-    # Main border and subtle panels.
     draw.rounded_rectangle((54, 50, 1146, 625), radius=34, outline=(255, 255, 255), width=3)
-    draw.rounded_rectangle((780, 130, 1105, 545), radius=36, fill=(255, 255, 255), outline=None)
-    overlay = Image.new("RGBA", (WIDTH, HEIGHT), (0, 0, 0, 0))
-    od = ImageDraw.Draw(overlay)
-    od.rounded_rectangle((780, 130, 1105, 545), radius=36, fill=(255, 255, 255, 32))
-    od.ellipse((850, 210, 1065, 425), outline=(255, 255, 255, 220), width=7)
-    od.ellipse((920, 280, 995, 355), fill=(255, 255, 255, 30))
-    img.alpha_composite(overlay) if img.mode == "RGBA" else None
 
-    # Re-create draw after possible alpha operation.
-    draw = ImageDraw.Draw(img)
     draw.text((86, 92), "ONEAI DAILY", font=font_kicker, fill=(220, 238, 255))
     draw.text((86, 145), f"TOP STORY {idx}", font=font_story, fill=(220, 238, 255))
 
-    # Title block: constrained to the left so it never overlaps the AI badge.
     y = 252
     for line in title_lines:
         draw.text((86, y), line, font=font_title, fill=(255, 255, 255))
         y += int(font_title.size * 1.25)
 
-    # Right visual badge.
+    # Right visual badge: line-only decoration, no solid placeholder panel.
     badge_font = load_font(86, bold=True)
     draw.ellipse((860, 220, 1060, 420), outline=(255, 255, 255), width=7)
+    draw.arc((805, 170, 1115, 470), start=25, end=335, fill=(220, 238, 255), width=3)
+    draw.arc((835, 125, 1085, 525), start=210, end=40, fill=(220, 238, 255), width=3)
     draw.text((910, 278), "AI", font=badge_font, fill=(255, 255, 255))
 
-    # Footer.
     draw.text((86, 555), "Understand AI. Understand the World.", font=font_brand, fill=(220, 238, 255))
     img.save(path, "PNG", optimize=True)
     print(f"generated: {safe_rel(path)}")
