@@ -4,3 +4,4 @@ PyYAML>=6.0.1
 markdown>=3.6
 beautifulsoup4>=4.12.3
 cairosvg>=2.7.1
+pillow>=10.4.0
