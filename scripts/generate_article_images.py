@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
-"""Generate simple PNG cards for markdown images that are referenced but missing.
+"""Generate PNG news cards for markdown images that are referenced by an article.
 
 Usage:
   python scripts/generate_article_images.py content/daily/2026-07-03-daily-briefing.md
+
+Environment:
+  FORCE_REGENERATE_IMAGES=1   regenerate images even if they already exist
 """
 
 from __future__ import annotations
@@ -17,13 +20,20 @@ ROOT = Path(__file__).resolve().parents[1]
 IMG_RE = re.compile(r"!\[([^\]]*)\]\(([^)]+\.png)\)")
 H2_RE = re.compile(r"^##\s+(.+)$", re.M)
 
+WIDTH = 1200
+HEIGHT = 675
+
 PALETTES = [
-    ((12, 36, 97), (33, 150, 243)),
-    ((9, 61, 44), (34, 197, 94)),
-    ((72, 36, 10), (249, 168, 37)),
-    ((42, 22, 91), (139, 92, 246)),
-    ((6, 78, 59), (132, 204, 22)),
+    ((10, 36, 93), (34, 132, 235)),
+    ((7, 77, 54), (32, 172, 109)),
+    ((73, 42, 14), (238, 157, 42)),
+    ((37, 28, 92), (110, 90, 230)),
+    ((6, 86, 64), (120, 190, 42)),
 ]
+
+
+def env_truthy(name: str, default: str = "0") -> bool:
+    return os.getenv(name, default).strip().lower() in {"1", "true", "yes", "y", "on"}
 
 
 def safe_rel(path: Path, base: Path = ROOT) -> str:
@@ -37,6 +47,7 @@ def load_font(size: int, bold: bool = False):
     candidates = [
         "/System/Library/Fonts/PingFang.ttc",
         "/System/Library/Fonts/Supplemental/Arial Unicode.ttf",
+        "/Library/Fonts/Arial Unicode.ttf",
         "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",
         "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf" if bold else "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
     ]
@@ -46,29 +57,44 @@ def load_font(size: int, bold: bool = False):
     return ImageFont.load_default()
 
 
-def wrap_text(text: str, font, max_width: int):
-    lines = []
+def text_width(text: str, font) -> int:
+    bbox = font.getbbox(text)
+    return bbox[2] - bbox[0]
+
+
+def wrap_text(text: str, font, max_width: int, max_lines: int = 3):
+    text = text.strip()
+    lines: list[str] = []
     current = ""
     for char in text:
-        test = current + char
-        if font.getbbox(test)[2] <= max_width:
-            current = test
-        else:
-            if current:
-                lines.append(current)
-            current = char
-    if current:
+        candidate = current + char
+        if text_width(candidate, font) <= max_width:
+            current = candidate
+            continue
+        if current:
+            lines.append(current)
+        current = char
+        if len(lines) >= max_lines:
+            break
+    if current and len(lines) < max_lines:
         lines.append(current)
+
+    if len(lines) == max_lines and len("".join(lines)) < len(text):
+        last = lines[-1]
+        while last and text_width(last + "…", font) > max_width:
+            last = last[:-1]
+        lines[-1] = last + "…"
     return lines
 
 
-def resolve(article: Path, ref: str) -> Path:
-    """Resolve a markdown image path.
+def clean_title(title: str, idx: int) -> str:
+    title = re.sub(r"^\s*\d+[\.、]\s*", "", title.strip())
+    # Keep the topic prefix, but remove excessive spaces around separators.
+    title = title.replace(" | ", "｜").replace("｜", "｜")
+    return title
 
-    The image path may point to a file that does not exist yet. In that case we
-    still must keep it under the repository instead of falling back to an outside
-    path such as ../../assets from ROOT.
-    """
+
+def resolve(article: Path, ref: str) -> Path:
     raw = ref.strip()
     if raw.startswith(("http://", "https://")):
         raise ValueError(f"Remote image URL is not supported: {raw}")
@@ -87,40 +113,64 @@ def resolve(article: Path, ref: str) -> Path:
     except ValueError:
         pass
 
-    # If a bad path tries to escape the repo, put it back under assets/images
-    # using only the basename. This avoids accidentally writing outside ROOT.
     fallback = ROOT / "assets" / "images" / article.stem.replace("-daily-briefing", "") / Path(raw).name
     return fallback.resolve()
 
 
-def make_card(path: Path, title: str, idx: int):
-    path.parent.mkdir(parents=True, exist_ok=True)
-    w, h = 1200, 675
-    c1, c2 = PALETTES[(idx - 1) % len(PALETTES)]
-    img = Image.new("RGB", (w, h), c1)
-    px = img.load()
-    for y in range(h):
-        for x in range(w):
-            t = (x / w + y / h) / 2
+def draw_gradient(draw_img: Image.Image, c1: tuple[int, int, int], c2: tuple[int, int, int]) -> None:
+    px = draw_img.load()
+    for y in range(HEIGHT):
+        for x in range(WIDTH):
+            t = (x / WIDTH * 0.72) + (y / HEIGHT * 0.28)
             px[x, y] = tuple(int(c1[i] * (1 - t) + c2[i] * t) for i in range(3))
 
+
+def make_card(path: Path, title: str, idx: int):
+    path.parent.mkdir(parents=True, exist_ok=True)
+    c1, c2 = PALETTES[(idx - 1) % len(PALETTES)]
+    img = Image.new("RGB", (WIDTH, HEIGHT), c1)
+    draw_gradient(img, c1, c2)
     draw = ImageDraw.Draw(img)
-    font_kicker = load_font(36, bold=True)
-    font_title = load_font(68, bold=True)
-    font_brand = load_font(30, bold=True)
 
+    title = clean_title(title, idx)
+    font_kicker = load_font(34, bold=True)
+    font_story = load_font(28, bold=True)
+    font_brand = load_font(28, bold=True)
+
+    # Choose a title font that fits a 3-line left text block.
+    for size in (56, 52, 48, 44):
+        font_title = load_font(size, bold=True)
+        title_lines = wrap_text(title, font_title, max_width=700, max_lines=3)
+        if len(title_lines) <= 3:
+            break
+
+    # Main border and subtle panels.
     draw.rounded_rectangle((54, 50, 1146, 625), radius=34, outline=(255, 255, 255), width=3)
+    draw.rounded_rectangle((780, 130, 1105, 545), radius=36, fill=(255, 255, 255), outline=None)
+    overlay = Image.new("RGBA", (WIDTH, HEIGHT), (0, 0, 0, 0))
+    od = ImageDraw.Draw(overlay)
+    od.rounded_rectangle((780, 130, 1105, 545), radius=36, fill=(255, 255, 255, 32))
+    od.ellipse((850, 210, 1065, 425), outline=(255, 255, 255, 220), width=7)
+    od.ellipse((920, 280, 995, 355), fill=(255, 255, 255, 30))
+    img.alpha_composite(overlay) if img.mode == "RGBA" else None
+
+    # Re-create draw after possible alpha operation.
+    draw = ImageDraw.Draw(img)
     draw.text((86, 92), "ONEAI DAILY", font=font_kicker, fill=(220, 238, 255))
-    draw.text((86, 150), f"TOP STORY {idx}", font=font_brand, fill=(220, 238, 255))
+    draw.text((86, 145), f"TOP STORY {idx}", font=font_story, fill=(220, 238, 255))
 
-    lines = wrap_text(title, font_title, 820)[:3]
-    y = 255
-    for line in lines:
+    # Title block: constrained to the left so it never overlaps the AI badge.
+    y = 252
+    for line in title_lines:
         draw.text((86, y), line, font=font_title, fill=(255, 255, 255))
-        y += 82
+        y += int(font_title.size * 1.25)
 
-    draw.ellipse((875, 195, 1085, 405), outline=(255, 255, 255), width=8)
-    draw.text((925, 260), "AI", font=load_font(82, bold=True), fill=(255, 255, 255))
+    # Right visual badge.
+    badge_font = load_font(86, bold=True)
+    draw.ellipse((860, 220, 1060, 420), outline=(255, 255, 255), width=7)
+    draw.text((910, 278), "AI", font=badge_font, fill=(255, 255, 255))
+
+    # Footer.
     draw.text((86, 555), "Understand AI. Understand the World.", font=font_brand, fill=(220, 238, 255))
     img.save(path, "PNG", optimize=True)
     print(f"generated: {safe_rel(path)}")
@@ -136,9 +186,11 @@ def main():
     text = article.read_text(encoding="utf-8")
     headings = H2_RE.findall(text)
     matches = IMG_RE.findall(text)
+    force = env_truthy("FORCE_REGENERATE_IMAGES", "0")
+
     for idx, (_alt, ref) in enumerate(matches, start=1):
         out = resolve(article, ref)
-        if out.exists():
+        if out.exists() and not force:
             print(f"exists: {safe_rel(out)}")
             continue
         title = headings[idx - 1] if idx - 1 < len(headings) else _alt
