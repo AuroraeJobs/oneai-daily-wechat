@@ -7,6 +7,7 @@ Usage:
 
 from __future__ import annotations
 
+import os
 import re
 import sys
 from pathlib import Path
@@ -23,6 +24,13 @@ PALETTES = [
     ((42, 22, 91), (139, 92, 246)),
     ((6, 78, 59), (132, 204, 22)),
 ]
+
+
+def safe_rel(path: Path, base: Path = ROOT) -> str:
+    try:
+        return path.resolve().relative_to(base.resolve()).as_posix()
+    except ValueError:
+        return str(path.resolve())
 
 
 def load_font(size: int, bold: bool = False):
@@ -55,10 +63,34 @@ def wrap_text(text: str, font, max_width: int):
 
 
 def resolve(article: Path, ref: str) -> Path:
-    p = (article.parent / ref).resolve()
-    if p.exists() or p.parent.exists():
-        return p
-    return (ROOT / ref).resolve()
+    """Resolve a markdown image path.
+
+    The image path may point to a file that does not exist yet. In that case we
+    still must keep it under the repository instead of falling back to an outside
+    path such as ../../assets from ROOT.
+    """
+    raw = ref.strip()
+    if raw.startswith(("http://", "https://")):
+        raise ValueError(f"Remote image URL is not supported: {raw}")
+
+    article_candidate = (article.parent / raw).resolve()
+    try:
+        article_candidate.relative_to(ROOT.resolve())
+        return article_candidate
+    except ValueError:
+        pass
+
+    root_candidate = (ROOT / raw).resolve()
+    try:
+        root_candidate.relative_to(ROOT.resolve())
+        return root_candidate
+    except ValueError:
+        pass
+
+    # If a bad path tries to escape the repo, put it back under assets/images
+    # using only the basename. This avoids accidentally writing outside ROOT.
+    fallback = ROOT / "assets" / "images" / article.stem.replace("-daily-briefing", "") / Path(raw).name
+    return fallback.resolve()
 
 
 def make_card(path: Path, title: str, idx: int):
@@ -91,7 +123,7 @@ def make_card(path: Path, title: str, idx: int):
     draw.text((925, 260), "AI", font=load_font(82, bold=True), fill=(255, 255, 255))
     draw.text((86, 555), "Understand AI. Understand the World.", font=font_brand, fill=(220, 238, 255))
     img.save(path, "PNG", optimize=True)
-    print(f"generated: {path.relative_to(ROOT)}")
+    print(f"generated: {safe_rel(path)}")
 
 
 def main():
@@ -100,13 +132,14 @@ def main():
     article = Path(sys.argv[1])
     if not article.is_absolute():
         article = ROOT / article
+    article = article.resolve()
     text = article.read_text(encoding="utf-8")
     headings = H2_RE.findall(text)
     matches = IMG_RE.findall(text)
     for idx, (_alt, ref) in enumerate(matches, start=1):
         out = resolve(article, ref)
         if out.exists():
-            print(f"exists: {out.relative_to(ROOT)}")
+            print(f"exists: {safe_rel(out)}")
             continue
         title = headings[idx - 1] if idx - 1 < len(headings) else _alt
         make_card(out, title, idx)
