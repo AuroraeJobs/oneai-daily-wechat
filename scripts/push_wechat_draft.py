@@ -66,7 +66,8 @@ def env_truthy(name: str, default: str = "0") -> bool:
 
 def display_title(metadata: dict) -> str:
     """Return the summarized title used by WeChat drafts and templates."""
-    return str(metadata.get("wechat_title") or metadata.get("title") or "OneAI Daily")
+    title = str(metadata.get("wechat_title") or metadata.get("title") or "OneAI Daily").strip()
+    return title if title.startswith("OneAI Daily｜") else f"OneAI Daily｜{title}"
 
 
 def find_latest_article() -> Path:
