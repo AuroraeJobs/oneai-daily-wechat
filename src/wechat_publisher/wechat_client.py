@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import mimetypes
 from pathlib import Path
 from typing import Any
 
@@ -48,11 +49,12 @@ class WeChatClient:
     def upload_article_image(self, access_token: str, image_path: Path) -> str:
         """Upload an image for rich-text article content and return the WeChat image URL."""
         url = f"{self.settings.api_base}/cgi-bin/media/uploadimg"
+        mime_type = mimetypes.guess_type(image_path.name)[0] or "image/png"
         with image_path.open("rb") as image_file:
             response = self.session.post(
                 url,
                 params={"access_token": access_token},
-                files={"media": (image_path.name, image_file, "image/png")},
+                files={"media": (image_path.name, image_file, mime_type)},
                 timeout=60,
             )
         try:
