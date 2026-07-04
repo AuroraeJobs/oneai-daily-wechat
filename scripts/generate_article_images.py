@@ -103,6 +103,16 @@ def clean_title(title: str, idx: int | None = None) -> str:
     return title.replace(" | ", "｜")
 
 
+def ensure_wechat_title(title: str) -> str:
+    title = title.strip()
+    return title if title.startswith("OneAI Daily｜") else f"OneAI Daily｜{title}"
+
+
+def card_title(title: str) -> str:
+    title = clean_title(title)
+    return re.sub(r"^\d+\.\s*", "", title)
+
+
 def resolve(article: Path, ref: str) -> Path:
     raw = ref.strip()
     if raw.startswith(("http://", "https://")):
@@ -157,15 +167,15 @@ def make_cover(path: Path, title: str):
     font_brand = load_font(34, bold=True)
     draw.text((86, 106), "ONEAI DAILY", font=font_brand, fill=(220, 238, 255))
 
-    title = clean_title(title)
-    for size in (82, 76, 70, 64, 58):
+    title = ensure_wechat_title(clean_title(title)).replace("OneAI Daily｜", "")
+    for size in (86, 80, 74, 68, 62):
         font_title = load_font(size, bold=True)
         title_lines = wrap_text(title, font_title, max_width=930, max_lines=2)
         if len(title_lines) <= 2:
             break
 
     total_h = len(title_lines) * int(font_title.size * 1.22)
-    y = 338 - total_h // 2
+    y = 350 - total_h // 2
     for line in title_lines:
         draw.text((86, y), line, font=font_title, fill=(255, 255, 255))
         y += int(font_title.size * 1.22)
@@ -182,26 +192,23 @@ def make_card(path: Path, title: str, idx: int):
     draw = ImageDraw.Draw(img)
     draw_background_accents(draw)
 
-    title = clean_title(title, idx)
-    font_kicker = load_font(34, bold=True)
-    font_story = load_font(28, bold=True)
-    font_brand = load_font(28, bold=True)
+    title = card_title(title)
+    font_brand = load_font(34, bold=True)
 
-    for size in (60, 56, 52, 48):
+    for size in (72, 66, 60, 54, 48):
         font_title = load_font(size, bold=True)
-        title_lines = wrap_text(title, font_title, max_width=950, max_lines=2)
+        title_lines = wrap_text(title, font_title, max_width=980, max_lines=2)
         if len(title_lines) <= 2:
             break
 
-    draw.text((86, 92), "ONEAI DAILY", font=font_kicker, fill=(220, 238, 255))
-    draw.text((86, 145), f"TOP STORY {idx}", font=font_story, fill=(220, 238, 255))
+    draw.text((86, 106), "ONEAI DAILY", font=font_brand, fill=(220, 238, 255))
 
-    y = 286
+    total_h = len(title_lines) * int(font_title.size * 1.22)
+    y = 345 - total_h // 2
     for line in title_lines:
         draw.text((86, y), line, font=font_title, fill=(255, 255, 255))
-        y += int(font_title.size * 1.25)
+        y += int(font_title.size * 1.22)
 
-    draw.text((86, 555), "Understand AI. Understand the World.", font=font_brand, fill=(220, 238, 255))
     img.save(path, "PNG", optimize=True)
     print(f"generated: {safe_rel(path)}")
 
