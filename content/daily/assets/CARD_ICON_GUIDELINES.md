@@ -1,72 +1,41 @@
-# Daily briefing card icon guidelines
+# Daily briefing card visual guidelines
 
-For OneAI Daily briefing SVG cards, keep the right-side icon slot fixed across all cards to avoid layout drift.
+For OneAI Daily briefing SVG cards, use a no-icon layout. The main headline should span horizontally across the card so the right side does not look empty.
 
-## Fixed icon slot
+## Fixed layout rules
 
-Use this container for every card:
+- Do not use right-side icons or icon slots.
+- Keep the card size at `1200 x 675`.
+- Keep the outer border at `x=54 y=50 width=1092 height=575 rx=34`.
+- Keep the brand line at `x=86 y=126`, `font-size=36`.
+- Keep the category line at `x=86 y=177`, `font-size=30`.
+- Use a single-line headline at approximately `x=86 y=348`.
+- Adjust headline font size per length, usually between `52` and `64`, so the title stays on one line.
+- Use the subtitle at approximately `x=88 y=426`, `font-size=34`.
+- Keep the footer at `x=86 y=582`, `font-size=28`.
 
-```svg
-<g transform="translate(860 178)" opacity="0.92">
-  <rect x="0" y="0" width="220" height="220" rx="28" fill="#ffffff" opacity="0.14"/>
-  <!-- fixed icon body goes here -->
-</g>
-```
+## Right-side balance
 
-Rules:
-
-- Do not move the container. Keep `translate(860 178)`.
-- Do not resize the backing plate. Keep `220 x 220`, `rx=28`.
-- Use only white strokes/fills inside the icon slot.
-- Keep icon geometry inside the `220 x 220` plate.
-- Reuse one of the five fixed icon bodies below.
-
-## Fixed icon types
-
-### 1. AI policy
+To avoid an empty right side without adding icons, use subtle abstract background shapes only:
 
 ```svg
-<rect x="42" y="58" width="110" height="124" rx="14" fill="none" stroke="#ffffff" stroke-width="8"/>
-<path d="M62 92h70M62 122h70M62 152h48" stroke="#ffffff" stroke-width="8" stroke-linecap="round"/>
-<circle cx="162" cy="74" r="34" fill="none" stroke="#ffffff" stroke-width="8"/>
-<text x="142" y="84" font-family="Arial, sans-serif" font-size="30" font-weight="800" fill="#ffffff">AI</text>
+<circle cx="970" cy="330" r="260" fill="#ffffff" opacity="0.045"/>
+<circle cx="1060" cy="250" r="150" fill="#ffffff" opacity="0.035"/>
+<path d="M86 478 H1068" stroke="#ffffff" stroke-width="3" opacity="0.22"/>
 ```
 
-### 2. Market / funding flow
+These shapes are decorative background accents, not icons. Keep them behind text and below the main background rectangle.
+
+## Example headline block
 
 ```svg
-<path d="M46 160 L88 126 L126 138 L162 96 L190 70" fill="none" stroke="#ffffff" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
-<path d="M168 70h22v22" fill="none" stroke="#ffffff" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
-<circle cx="88" cy="126" r="8" fill="#ffffff"/>
-<circle cx="126" cy="138" r="8" fill="#ffffff"/>
-<circle cx="162" cy="96" r="8" fill="#ffffff"/>
+<text x="86" y="348" font-family="Arial, 'Noto Sans CJK SC', sans-serif" font-size="60" font-weight="800" fill="#ffffff">Kling raises $2.8B for AI video</text>
+<text x="88" y="426" font-family="Arial, 'Noto Sans CJK SC', sans-serif" font-size="34" fill="#eee4ff">China’s generative-video race accelerates</text>
 ```
 
-### 3. Startup / AI video
+## Font sizing guide
 
-```svg
-<rect x="42" y="56" width="136" height="92" rx="14" fill="none" stroke="#ffffff" stroke-width="8"/>
-<path d="M92 78 L92 126 L132 102 Z" fill="#ffffff"/>
-<path d="M54 176h112" stroke="#ffffff" stroke-width="8" stroke-linecap="round"/>
-<path d="M52 44v120M72 44v120M148 44v120M168 44v120" stroke="#ffffff" stroke-width="5" opacity="0.55"/>
-```
-
-### 4. Engineering / drones
-
-```svg
-<path d="M52 110h116M110 52v116" stroke="#ffffff" stroke-width="10" stroke-linecap="round"/>
-<circle cx="52" cy="110" r="28" fill="none" stroke="#ffffff" stroke-width="8"/>
-<circle cx="168" cy="110" r="28" fill="none" stroke="#ffffff" stroke-width="8"/>
-<circle cx="110" cy="52" r="24" fill="none" stroke="#ffffff" stroke-width="8"/>
-<circle cx="110" cy="168" r="24" fill="none" stroke="#ffffff" stroke-width="8"/>
-<circle cx="110" cy="110" r="16" fill="#ffffff"/>
-```
-
-### 5. AI infrastructure / chip
-
-```svg
-<rect x="58" y="58" width="104" height="104" rx="14" fill="none" stroke="#ffffff" stroke-width="8"/>
-<path d="M78 88h64M78 112h64M78 136h44" stroke="#ffffff" stroke-width="7" stroke-linecap="round"/>
-<path d="M40 88H20M40 112H20M40 136H20M180 88h20M180 112h20M180 136h20" stroke="#ffffff" stroke-width="7" stroke-linecap="round" opacity="0.82"/>
-<path d="M82 40V20M110 40V20M138 40V20M82 180v20M110 180v20M138 180v20" stroke="#ffffff" stroke-width="7" stroke-linecap="round" opacity="0.82"/>
-```
+- Short headline, 20–28 characters: `64`
+- Medium headline, 29–35 characters: `58–60`
+- Long headline, 36–42 characters: `52–56`
+- If a headline still does not fit at `52`, shorten the headline rather than wrapping to two lines.
