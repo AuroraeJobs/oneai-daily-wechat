@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="675" viewBox="0 0 1200 675" role="img" aria-label="Kling AI video funding daily briefing card">
+  <defs><linearGradient id="g" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="#3a1e5c"/><stop offset="1" stop-color="#9053dc"/></linearGradient></defs>
+  <rect width="1200" height="675" rx="44" fill="url(#g)"/>
+  <rect x="54" y="50" width="1092" height="575" rx="34" fill="none" stroke="#f5f8ff" stroke-width="4" opacity="0.92"/>
+  <text x="86" y="126" font-family="Arial, 'Noto Sans CJK SC', sans-serif" font-size="36" font-weight="700" fill="#eee4ff">ONEAI DAILY</text>
+  <text x="86" y="177" font-family="Arial, 'Noto Sans CJK SC', sans-serif" font-size="30" font-weight="700" fill="#eee4ff">TOP STORY 3 · 创业</text>
+  <text x="86" y="300" font-family="Arial, 'Noto Sans CJK SC', sans-serif" font-size="58" font-weight="800" fill="#ffffff">Kling raises $2.8B</text>
+  <text x="86" y="370" font-family="Arial, 'Noto Sans CJK SC', sans-serif" font-size="58" font-weight="800" fill="#ffffff">for AI video</text>
+  <text x="88" y="442" font-family="Arial, 'Noto Sans CJK SC', sans-serif" font-size="32" fill="#eee4ff">China’s generative-video race accelerates</text>
+  <g transform="translate(830 180)" opacity="0.92">
+    <rect x="20" y="35" width="295" height="220" rx="28" fill="#ffffff" opacity="0.14"/>
+    <rect x="64" y="80" width="190" height="115" rx="18" fill="none" stroke="#ffffff" stroke-width="10"/>
+    <path d="M143 106 L143 170 L197 138 Z" fill="#ffffff"/>
+    <path d="M62 230h210" stroke="#ffffff" stroke-width="10" stroke-linecap="round" opacity="0.82"/>
+    <path d="M70 57v175M108 57v175M244 57v175M282 57v175" stroke="#ffffff" stroke-width="6" opacity="0.55"/>
+  </g>
+  <text x="86" y="582" font-family="Arial, 'Noto Sans CJK SC', sans-serif" font-size="28" font-weight="700" fill="#eee4ff">Understand AI. Understand the World.</text>
+</svg>
