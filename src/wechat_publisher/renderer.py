@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import re
+from collections.abc import Callable
 from dataclasses import dataclass
 from html import unescape
 from pathlib import Path
@@ -10,12 +11,14 @@ import markdown
 _FRONT_MATTER_RE = re.compile(r"\A---\s*\n(?P<meta>.*?)\n---\s*\n(?P<body>.*)\Z", re.DOTALL)
 _HEADING_RE = re.compile(r"^#\s+(?P<title>.+?)\s*$", re.MULTILINE)
 _INTERNAL_NOTES_RE = re.compile(
-    r"(?ms)^##\s*(?:发布备注|备注|内部备注|草稿备注|Notes|Publishing Notes)\s*\n.*?(?=^##\s+|\Z)"
+    r"(?ms)^#{1,6}\s*(?:发布备注|备注|内部备注|草稿备注|Notes|Publishing Notes)\s*$.*\Z"
 )
+_IMG_SRC_RE = re.compile(r'(<img\b[^>]*?\bsrc=")([^"]+)("[^>]*>)')
 _TAG_RE = re.compile(r"<[^>]+>")
 _UNICODE_ESCAPE_RE = re.compile(r"\\([uU])([0-9a-fA-F]{4,8})")
 _MAX_DIGEST_BYTES = 120
 _FOOTER_TEXT = "由 OneAI Daily 自动发布。"
+ImageUrlResolver = Callable[[str], str]
 
 
 @dataclass(frozen=True)
@@ -68,6 +71,7 @@ def render_markdown_article(
     default_thumb_media_id: str,
     default_need_open_comment: int = 0,
     default_only_fans_can_comment: int = 0,
+    image_url_resolver: ImageUrlResolver | None = None,
 ) -> RenderedArticle:
     text = _decode_unicode_escape_literals(path.read_text(encoding="utf-8"))
     meta, body = parse_front_matter(text)
@@ -81,6 +85,8 @@ def render_markdown_article(
         extensions=["extra", "sane_lists", "smarty"],
         output_format="html5",
     )
+    if image_url_resolver is not None:
+        html = _resolve_image_urls(html, image_url_resolver)
     content = wrap_for_wechat(html)
     digest = meta.get("digest") or _build_digest(html)
 
@@ -154,7 +160,17 @@ def _strip_leading_h1(body: str) -> str:
 
 def _strip_internal_notes(body: str) -> str:
     """Remove Markdown-only notes that should not appear in WeChat drafts."""
-    return _INTERNAL_NOTES_RE.sub("", body).strip() + "\n"
+    stripped = _INTERNAL_NOTES_RE.sub("", body).strip()
+    return f"{stripped}\n" if stripped else ""
+
+
+def _resolve_image_urls(html: str, resolver: ImageUrlResolver) -> str:
+    def replace(match: re.Match[str]) -> str:
+        original_src = match.group(2)
+        resolved_src = resolver(unescape(original_src))
+        return f"{match.group(1)}{resolved_src}{match.group(3)}"
+
+    return _IMG_SRC_RE.sub(replace, html)
 
 
 def _extract_title(body: str) -> str:
