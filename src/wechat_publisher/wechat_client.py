@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from pathlib import Path
 from typing import Any
 
 import requests
@@ -43,6 +44,34 @@ class WeChatClient:
         if not isinstance(media_id, str) or not media_id:
             raise WeChatApiError(f"WeChat draft response did not contain media_id: {data}")
         return media_id
+
+    def upload_article_image(self, access_token: str, image_path: Path) -> str:
+        """Upload an image for rich-text article content and return the WeChat image URL."""
+        url = f"{self.settings.api_base}/cgi-bin/media/uploadimg"
+        with image_path.open("rb") as image_file:
+            response = self.session.post(
+                url,
+                params={"access_token": access_token},
+                files={"media": (image_path.name, image_file, "image/png")},
+                timeout=60,
+            )
+        try:
+            response.raise_for_status()
+            data = response.json()
+        except requests.HTTPError as exc:
+            raise WeChatApiError(f"HTTP error from WeChat image upload API: {exc}; body={response.text[:500]}") from exc
+        except json.JSONDecodeError as exc:
+            raise WeChatApiError(f"Invalid JSON response from WeChat image upload API: {response.text[:500]}") from exc
+
+        errcode = data.get("errcode")
+        if errcode not in (None, 0):
+            errmsg = data.get("errmsg", "")
+            raise WeChatApiError(f"WeChat image upload error {errcode}: {errmsg}; response={data}")
+
+        image_url = data.get("url")
+        if not isinstance(image_url, str) or not image_url:
+            raise WeChatApiError(f"WeChat image upload response did not contain url: {data}")
+        return image_url
 
     def submit_publish(self, access_token: str, media_id: str) -> dict[str, Any]:
         return self._request(
