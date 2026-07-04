@@ -76,7 +76,7 @@ def render_markdown_article(
     text = _decode_unicode_escape_literals(path.read_text(encoding="utf-8"))
     meta, body = parse_front_matter(text)
 
-    title = meta.get("title") or _extract_title(body) or path.stem
+    title = meta.get("wechat_title") or meta.get("title") or _extract_title(body) or path.stem
     body = _strip_leading_h1(body)
     body = _strip_internal_notes(body)
 
