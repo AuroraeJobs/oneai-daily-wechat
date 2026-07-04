@@ -76,7 +76,7 @@ def render_markdown_article(
     text = _decode_unicode_escape_literals(path.read_text(encoding="utf-8"))
     meta, body = parse_front_matter(text)
 
-    title = meta.get("wechat_title") or meta.get("title") or _extract_title(body) or path.stem
+    title = _ensure_wechat_title(meta.get("wechat_title") or meta.get("title") or _extract_title(body) or path.stem)
     body = _strip_leading_h1(body)
     body = _strip_internal_notes(body)
 
@@ -123,30 +123,12 @@ def wrap_for_wechat(html: str) -> str:
 
 def _style_wechat_blocks(html: str) -> str:
     replacements = [
-        (
-            r"<h1>",
-            '<h1 style="margin:0 0 24px;font-size:28px;line-height:1.35;font-weight:700;color:#111827;">',
-        ),
-        (
-            r"<h2>",
-            '<h2 style="margin:38px 0 18px;padding-top:4px;font-size:22px;line-height:1.45;font-weight:700;color:#111827;">',
-        ),
-        (
-            r"<h3>",
-            '<h3 style="margin:30px 0 14px;font-size:19px;line-height:1.5;font-weight:700;color:#111827;">',
-        ),
-        (
-            r"<p>",
-            '<p style="margin:16px 0;line-height:1.95;color:#1f2328;">',
-        ),
-        (
-            r"<blockquote>",
-            '<blockquote style="margin:24px 0;padding:10px 0 10px 16px;border-left:4px solid #d1d5db;color:#4b5563;background:#f9fafb;">',
-        ),
-        (
-            r"<hr\s*/?>",
-            '<hr style="border:none;border-top:1px solid #e5e7eb;margin:34px 0;">',
-        ),
+        (r"<h1>", '<h1 style="margin:0 0 24px;font-size:28px;line-height:1.35;font-weight:700;color:#111827;">'),
+        (r"<h2>", '<h2 style="margin:38px 0 18px;padding-top:4px;font-size:22px;line-height:1.45;font-weight:700;color:#111827;">'),
+        (r"<h3>", '<h3 style="margin:30px 0 14px;font-size:19px;line-height:1.5;font-weight:700;color:#111827;">'),
+        (r"<p>", '<p style="margin:16px 0;line-height:1.95;color:#1f2328;">'),
+        (r"<blockquote>", '<blockquote style="margin:24px 0;padding:10px 0 10px 16px;border-left:4px solid #d1d5db;color:#4b5563;background:#f9fafb;">'),
+        (r"<hr\s*/?>", '<hr style="border:none;border-top:1px solid #e5e7eb;margin:34px 0;">'),
     ]
 
     for pattern, replacement in replacements:
@@ -154,12 +136,16 @@ def _style_wechat_blocks(html: str) -> str:
     return html
 
 
+def _ensure_wechat_title(value: str) -> str:
+    value = value.strip()
+    return value if value.startswith("OneAI Daily｜") else f"OneAI Daily｜{value}"
+
+
 def _strip_leading_h1(body: str) -> str:
     return re.sub(r"\A\s*#\s+.+?(?:\n+|\Z)", "", body, count=1)
 
 
 def _strip_internal_notes(body: str) -> str:
-    """Remove Markdown-only notes that should not appear in WeChat drafts."""
     stripped = _INTERNAL_NOTES_RE.sub("", body).strip()
     return f"{stripped}\n" if stripped else ""
 
