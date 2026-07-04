@@ -7,12 +7,5 @@
   <text x="86" y="300" font-family="Arial, 'Noto Sans CJK SC', sans-serif" font-size="58" font-weight="800" fill="#ffffff">Hardware beats</text>
   <text x="86" y="370" font-family="Arial, 'Noto Sans CJK SC', sans-serif" font-size="58" font-weight="800" fill="#ffffff">hyperscalers</text>
   <text x="88" y="442" font-family="Arial, 'Noto Sans CJK SC', sans-serif" font-size="32" fill="#fff0df">Memory and chips capture AI returns</text>
-  <g transform="translate(835 180)" opacity="0.92">
-    <rect x="34" y="38" width="260" height="220" rx="30" fill="#ffffff" opacity="0.13"/>
-    <rect x="86" y="82" width="158" height="132" rx="16" fill="none" stroke="#ffffff" stroke-width="10"/>
-    <path d="M116 112h98M116 148h98M116 184h72" stroke="#ffffff" stroke-width="9" stroke-linecap="round"/>
-    <path d="M68 112H35M68 148H35M68 184H35M262 112h33M262 148h33M262 184h33" stroke="#ffffff" stroke-width="8" stroke-linecap="round" opacity="0.82"/>
-    <path d="M128 64V31M164 64V31M200 64V31M128 235v33M164 235v33M200 235v33" stroke="#ffffff" stroke-width="8" stroke-linecap="round" opacity="0.82"/>
-  </g>
   <text x="86" y="582" font-family="Arial, 'Noto Sans CJK SC', sans-serif" font-size="28" font-weight="700" fill="#fff0df">Understand AI. Understand the World.</text>
 </svg>
