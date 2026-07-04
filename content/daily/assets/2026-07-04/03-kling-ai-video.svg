@@ -7,5 +7,12 @@
   <text x="86" y="300" font-family="Arial, 'Noto Sans CJK SC', sans-serif" font-size="58" font-weight="800" fill="#ffffff">Kling raises $2.8B</text>
   <text x="86" y="370" font-family="Arial, 'Noto Sans CJK SC', sans-serif" font-size="58" font-weight="800" fill="#ffffff">for AI video</text>
   <text x="88" y="442" font-family="Arial, 'Noto Sans CJK SC', sans-serif" font-size="32" fill="#eee4ff">China’s generative-video race accelerates</text>
+  <g transform="translate(860 178)" opacity="0.92">
+    <rect x="0" y="0" width="220" height="220" rx="28" fill="#ffffff" opacity="0.14"/>
+    <rect x="42" y="56" width="136" height="92" rx="14" fill="none" stroke="#ffffff" stroke-width="8"/>
+    <path d="M92 78 L92 126 L132 102 Z" fill="#ffffff"/>
+    <path d="M54 176h112" stroke="#ffffff" stroke-width="8" stroke-linecap="round"/>
+    <path d="M52 44v120M72 44v120M148 44v120M168 44v120" stroke="#ffffff" stroke-width="5" opacity="0.55"/>
+  </g>
   <text x="86" y="582" font-family="Arial, 'Noto Sans CJK SC', sans-serif" font-size="28" font-weight="700" fill="#eee4ff">Understand AI. Understand the World.</text>
 </svg>
