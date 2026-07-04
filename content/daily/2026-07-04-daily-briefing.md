@@ -24,10 +24,6 @@ hero_images:
 
 # OneAI Daily｜今日AI要闻
 
-> 5 条过去 24 小时内最值得关注的 AI、市场、创业与工程新闻。每条包含简明摘要、为什么重要、配图与来源，便于后续转换为微信公众号草稿。
-
----
-
 ## 1. AI 政策｜阿根廷提出 AI 运营公司法案
 
 ![Argentina AI policy](assets/2026-07-04/01-ai-policy-argentina.svg)
