@@ -26,10 +26,12 @@ import re
 import sys
 import json
 import mimetypes
+import tempfile
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict
 
+import cairosvg
 import markdown
 import requests
 import yaml
@@ -41,6 +43,9 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 DAILY_DIR = REPO_ROOT / "content" / "daily"
 DEFAULT_COVER = "assets/brand/oneai-daily-cover.png"
 DEFAULT_TEMPLATE = "templates/wechat.html"
+INTERNAL_NOTES_RE = re.compile(
+    r"(?ms)^#{1,6}\s*(?:发布备注|备注|内部备注|草稿备注|Notes|Publishing Notes)\s*$.*\Z"
+)
 
 load_dotenv(REPO_ROOT / ".env", override=False)
 
@@ -84,8 +89,14 @@ def load_article(path: Path) -> Article:
     if text.startswith("---"):
         parts = text.split("---", 2)
         if len(parts) >= 3:
-            return Article(metadata=yaml.safe_load(parts[1]) or {}, body=parts[2].strip(), path=path)
-    return Article(metadata={}, body=text, path=path)
+            body = strip_internal_notes(parts[2].strip())
+            return Article(metadata=yaml.safe_load(parts[1]) or {}, body=body, path=path)
+    return Article(metadata={}, body=strip_internal_notes(text), path=path)
+
+
+def strip_internal_notes(md_text: str) -> str:
+    stripped = INTERNAL_NOTES_RE.sub("", md_text).strip()
+    return f"{stripped}\n" if stripped else ""
 
 
 def strip_first_h1(md_text: str) -> str:
@@ -129,6 +140,14 @@ def get_image_mime(path: Path) -> str:
     if mime not in {"image/jpeg", "image/png", "image/gif", "image/bmp"}:
         raise WeChatError(f"Unsupported image type for WeChat: {path}")
     return mime
+
+
+def prepare_body_image_for_upload(image_path: Path, temp_dir: Path) -> Path:
+    if is_svg_path(image_path):
+        png_path = temp_dir / f"{image_path.stem}.png"
+        cairosvg.svg2png(url=str(image_path), write_to=str(png_path), output_width=1200, output_height=675)
+        return png_path
+    return image_path
 
 
 def upload_body_image(access_token: str, image_path: Path) -> str:
@@ -202,19 +221,21 @@ def resolve_cover_ref(article: Article) -> str:
 def replace_markdown_images(article: Article, access_token: str) -> str:
     image_cache: Dict[str, str] = {}
 
-    def repl(match: re.Match) -> str:
-        alt = match.group(1)
-        ref = match.group(2)
-        local_path = resolve_image_path(article.path, ref)
-        if is_svg_path(local_path):
-            print(f"skipped SVG body image: {ref}")
-            return ""
-        if ref not in image_cache:
-            image_cache[ref] = upload_body_image(access_token, local_path)
-            print(f"uploaded body image: {ref} -> {image_cache[ref]}")
-        return f"![{alt}]({image_cache[ref]})"
+    with tempfile.TemporaryDirectory(prefix="oneai-wechat-body-images-") as temp_dir_name:
+        temp_dir = Path(temp_dir_name)
 
-    return re.sub(r"!\[([^\]]*)\]\(([^)]+)\)", repl, article.body)
+        def repl(match: re.Match) -> str:
+            alt = match.group(1)
+            ref = match.group(2)
+            local_path = resolve_image_path(article.path, ref)
+            if ref not in image_cache:
+                upload_path = prepare_body_image_for_upload(local_path, temp_dir)
+                image_cache[ref] = upload_body_image(access_token, upload_path)
+                action = "converted and uploaded SVG body image" if is_svg_path(local_path) else "uploaded body image"
+                print(f"{action}: {ref} -> {image_cache[ref]}")
+            return f"![{alt}]({image_cache[ref]})"
+
+        return re.sub(r"!\[([^\]]*)\]\(([^)]+)\)", repl, article.body)
 
 
 def markdown_to_wechat_html(md_text: str) -> str:
