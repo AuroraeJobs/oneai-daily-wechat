@@ -8,6 +8,8 @@
 
 - Markdown + Front Matter 撰写文章
 - 自动解析标题、摘要、作者、封面素材 ID
+- 非 dry-run 创建草稿时，自动把 Markdown 本地图片上传为微信公众号图文图片 URL
+- SVG 配图会自动转成 PNG 后再上传
 - 微信公众号 `access_token` 获取、草稿创建、发布提交
 - GitHub Actions 定时发布与手动触发
 - 本地 dry-run 预览，不调用微信 API
@@ -75,6 +77,8 @@ python -m wechat_publisher.publish --post content/posts/2026-07-01-sample.md --d
 WECHAT_DRY_RUN=false python -m wechat_publisher.publish --post content/posts/2026-07-01-sample.md
 ```
 
+旧草稿不会被脚本自动修改。每次修复正文、标题、图片或备注过滤逻辑后，都需要重新创建一篇新草稿。
+
 ### 5. 创建草稿并提交发布
 
 ```bash
@@ -121,9 +125,25 @@ show_cover_pic: 0
 # OneAI Daily
 ```
 
+## Markdown 图片
+
+Markdown 正文里的本地图片会在非 dry-run 创建草稿时自动上传到微信图文图片接口，并把 `<img src="...">` 替换成微信返回的 URL。
+
+支持：
+
+- `.png`
+- `.jpg` / `.jpeg`
+- `.svg`，会先转成 PNG 再上传
+
+图片路径建议使用相对 Markdown 文件的相对路径，例如：
+
+```markdown
+![cover](assets/2026-07-04/01-ai-policy-argentina.svg)
+```
+
 ## Markdown 内部备注
 
-以下二级标题开头的章节只保留在 Markdown 源文件里，生成微信公众号草稿时会自动过滤，不进入正文：
+以下标题开头的章节只保留在 Markdown 源文件里，生成微信公众号草稿时会从该标题开始过滤到文末，不进入正文：
 
 - `## 发布备注`
 - `## 备注`
