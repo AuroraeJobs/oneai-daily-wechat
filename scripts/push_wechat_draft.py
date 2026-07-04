@@ -8,7 +8,6 @@ Required env vars, usually loaded from .env:
 Optional env vars:
   ARTICLE_PATH=content/daily/2026-07-02-daily-briefing.md
   DEFAULT_COVER=assets/brand/oneai-daily-cover.png
-  USE_ARTICLE_COVER=0
   WECHAT_TEMPLATE=templates/wechat.html
   AUTHOR=OneAI Daily
   NEED_OPEN_COMMENT=0
@@ -139,7 +138,7 @@ def get_image_mime(path: Path) -> str:
     if is_svg_path(path):
         raise WeChatError(
             "SVG cover images are disabled for WeChat publishing. "
-            "Please use assets/brand/oneai-daily-cover.png as DEFAULT_COVER."
+            "Use a generated per-issue PNG cover in front matter."
         )
     mime, _ = mimetypes.guess_type(path.name)
     if mime not in {"image/jpeg", "image/png", "image/gif", "image/bmp"}:
@@ -205,22 +204,18 @@ def resolve_default_cover() -> str:
 
 
 def resolve_cover_ref(article: Article) -> str:
-    env_cover = resolve_default_cover()
-    use_article_cover = env_truthy("USE_ARTICLE_COVER", "0")
-
-    if env_cover and not use_article_cover:
-        return env_cover
-
     article_cover = str(article.metadata.get("cover") or "").strip()
     if article_cover:
         return article_cover
+
+    env_cover = resolve_default_cover()
     if env_cover:
         return env_cover
 
     match = re.search(r"!\[[^\]]*\]\(([^)]+)\)", article.body)
     if match:
         return match.group(1)
-    raise WeChatError("No cover found. Set DEFAULT_COVER in .env or cover in front matter")
+    raise WeChatError("No cover found. Set cover in front matter or DEFAULT_COVER in .env")
 
 
 def replace_markdown_images(article: Article, access_token: str) -> str:
