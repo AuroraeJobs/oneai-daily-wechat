@@ -65,6 +65,11 @@ def env_truthy(name: str, default: str = "0") -> bool:
     return os.getenv(name, default).strip().lower() in {"1", "true", "yes", "y", "on"}
 
 
+def display_title(metadata: dict) -> str:
+    """Return the summarized title used by WeChat drafts and templates."""
+    return str(metadata.get("wechat_title") or metadata.get("title") or "OneAI Daily")
+
+
 def find_latest_article() -> Path:
     if not DAILY_DIR.exists():
         raise FileNotFoundError(f"Daily content directory not found: {DAILY_DIR}")
@@ -263,7 +268,7 @@ def apply_template(content_html: str, metadata: dict) -> str:
         return content_html
     template = template_path.read_text(encoding="utf-8")
     return (
-        template.replace("{{ title }}", str(metadata.get("title") or "OneAI Daily"))
+        template.replace("{{ title }}", display_title(metadata))
         .replace("{{ digest }}", str(metadata.get("digest") or "今日5条"))
         .replace("{{ content }}", content_html)
     )
@@ -274,7 +279,7 @@ def create_draft(access_token: str, article: Article, content_html: str, thumb_m
     payload = {
         "articles": [
             {
-                "title": metadata.get("title") or "OneAI Daily",
+                "title": display_title(metadata),
                 "author": metadata.get("author") or os.getenv("AUTHOR", "OneAI Daily"),
                 "digest": (metadata.get("digest") or "今日5条")[:54],
                 "content": content_html,
