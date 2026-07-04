@@ -7,11 +7,5 @@
   <text x="86" y="300" font-family="Arial, 'Noto Sans CJK SC', sans-serif" font-size="58" font-weight="800" fill="#ffffff">Money rotates into</text>
   <text x="86" y="370" font-family="Arial, 'Noto Sans CJK SC', sans-serif" font-size="58" font-weight="800" fill="#ffffff">AI infrastructure</text>
   <text x="88" y="442" font-family="Arial, 'Noto Sans CJK SC', sans-serif" font-size="32" fill="#e1eeff">Tech funds rebound as chips lead</text>
-  <g transform="translate(830 188)" opacity="0.9">
-    <rect x="20" y="40" width="280" height="210" rx="26" fill="#ffffff" opacity="0.14"/>
-    <path d="M65 215 L115 160 L165 178 L215 105 L270 74" fill="none" stroke="#ffffff" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
-    <path d="M243 72h30v30" fill="none" stroke="#ffffff" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
-    <circle cx="115" cy="160" r="11" fill="#ffffff"/><circle cx="165" cy="178" r="11" fill="#ffffff"/><circle cx="215" cy="105" r="11" fill="#ffffff"/>
-  </g>
   <text x="86" y="582" font-family="Arial, 'Noto Sans CJK SC', sans-serif" font-size="28" font-weight="700" fill="#deeeff">Understand AI. Understand the World.</text>
 </svg>
