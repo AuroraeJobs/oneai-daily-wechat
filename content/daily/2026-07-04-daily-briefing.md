@@ -1,5 +1,5 @@
 ---
-title: "OneAI Daily Briefing｜2026-07-04"
+title: "OneAI Daily｜今日AI要闻"
 date: "2026-07-04"
 digest: "今日AI要闻"
 source: "manual-curated"
@@ -20,7 +20,7 @@ hero_images:
   - content/daily/assets/2026-07-04/05-ubs-ai-infrastructure.svg
 ---
 
-# OneAI Daily Briefing｜2026-07-04
+# OneAI Daily｜今日AI要闻
 
 > 5 条过去 24 小时内最值得关注的 AI、市场、创业与工程新闻。每条包含简明摘要、为什么重要、配图与来源，便于后续转换为微信公众号草稿。
 
