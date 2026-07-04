@@ -9,6 +9,9 @@ import markdown
 
 _FRONT_MATTER_RE = re.compile(r"\A---\s*\n(?P<meta>.*?)\n---\s*\n(?P<body>.*)\Z", re.DOTALL)
 _HEADING_RE = re.compile(r"^#\s+(?P<title>.+?)\s*$", re.MULTILINE)
+_INTERNAL_NOTES_RE = re.compile(
+    r"(?ms)^##\s*(?:发布备注|备注|内部备注|草稿备注|Notes|Publishing Notes)\s*\n.*?(?=^##\s+|\Z)"
+)
 _TAG_RE = re.compile(r"<[^>]+>")
 _UNICODE_ESCAPE_RE = re.compile(r"\\([uU])([0-9a-fA-F]{4,8})")
 _MAX_DIGEST_BYTES = 120
@@ -71,6 +74,7 @@ def render_markdown_article(
 
     title = meta.get("title") or _extract_title(body) or path.stem
     body = _strip_leading_h1(body)
+    body = _strip_internal_notes(body)
 
     html = markdown.markdown(
         body,
@@ -146,6 +150,11 @@ def _style_wechat_blocks(html: str) -> str:
 
 def _strip_leading_h1(body: str) -> str:
     return re.sub(r"\A\s*#\s+.+?(?:\n+|\Z)", "", body, count=1)
+
+
+def _strip_internal_notes(body: str) -> str:
+    """Remove Markdown-only notes that should not appear in WeChat drafts."""
+    return _INTERNAL_NOTES_RE.sub("", body).strip() + "\n"
 
 
 def _extract_title(body: str) -> str:
