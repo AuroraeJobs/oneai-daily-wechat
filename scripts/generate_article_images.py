@@ -20,7 +20,7 @@ from PIL import Image, ImageDraw, ImageFont
 
 ROOT = Path(__file__).resolve().parents[1]
 FRONT_MATTER_RE = re.compile(r"\A---\s*\n(?P<meta>.*?)\n---\s*\n(?P<body>.*)\Z", re.S)
-IMG_RE = re.compile(r"!\[([^\]]*)\]\(([^)]+\.png)\)")
+IMG_RE = re.compile(r"!\[([^\]]*)\]\(([^)]+\.(?:png|svg))\)", re.I)
 H2_RE = re.compile(r"^##\s+(.+)$", re.M)
 
 WIDTH = 1200
@@ -126,6 +126,10 @@ def resolve(article: Path, ref: str) -> Path:
     return fallback.resolve()
 
 
+def publish_png_path(path: Path) -> Path:
+    return path.with_suffix(".png") if path.suffix.lower() in {".svg", ".svgz"} else path
+
+
 def draw_gradient(draw_img: Image.Image, c1: tuple[int, int, int], c2: tuple[int, int, int]) -> None:
     px = draw_img.load()
     for y in range(HEIGHT):
@@ -135,10 +139,9 @@ def draw_gradient(draw_img: Image.Image, c1: tuple[int, int, int], c2: tuple[int
 
 
 def draw_background_accents(draw: ImageDraw.ImageDraw) -> None:
-    # Keep the right side visually balanced without large opaque shapes.
     line_color = (235, 245, 255)
-    for offset, alpha_width in ((0, 2), (42, 1), (84, 1)):
-        draw.line((760 + offset, 120, 1110 + offset, 555), fill=line_color, width=alpha_width)
+    for offset, width in ((0, 2), (42, 1), (84, 1)):
+        draw.line((760 + offset, 120, 1110 + offset, 555), fill=line_color, width=width)
     for x, y, r in ((930, 165, 5), (1000, 245, 4), (1080, 365, 5), (880, 455, 3)):
         draw.ellipse((x - r, y - r, x + r, y + r), fill=(235, 245, 255))
 
@@ -235,7 +238,7 @@ def main():
     maybe_generate_cover(article, metadata, force)
 
     for idx, (_alt, ref) in enumerate(matches, start=1):
-        out = resolve(article, ref)
+        out = publish_png_path(resolve(article, ref))
         if out.exists() and not force:
             print(f"exists: {safe_rel(out)}")
             continue
