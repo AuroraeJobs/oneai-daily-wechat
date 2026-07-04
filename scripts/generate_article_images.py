@@ -153,7 +153,6 @@ def make_cover(path: Path, title: str):
     draw_gradient(img, c1, c2)
     draw = ImageDraw.Draw(img)
     draw_background_accents(draw)
-    draw.rounded_rectangle((54, 50, 1146, 625), radius=34, outline=(255, 255, 255), width=3)
 
     font_brand = load_font(34, bold=True)
     draw.text((86, 106), "ONEAI DAILY", font=font_brand, fill=(220, 238, 255))
@@ -193,8 +192,6 @@ def make_card(path: Path, title: str, idx: int):
         title_lines = wrap_text(title, font_title, max_width=950, max_lines=2)
         if len(title_lines) <= 2:
             break
-
-    draw.rounded_rectangle((54, 50, 1146, 625), radius=34, outline=(255, 255, 255), width=3)
 
     draw.text((86, 92), "ONEAI DAILY", font=font_kicker, fill=(220, 238, 255))
     draw.text((86, 145), f"TOP STORY {idx}", font=font_story, fill=(220, 238, 255))
