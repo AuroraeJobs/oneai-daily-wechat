@@ -104,6 +104,8 @@ Variables：
 
 ## 文章 Front Matter
 
+微信公众号草稿标题直接取 `title` 字段；正文里的一级标题会被移除，避免草稿标题和正文重复。
+
 ```markdown
 ---
 title: "OneAI Daily"
@@ -117,24 +119,15 @@ show_cover_pic: 0
 ---
 
 # OneAI Daily
-
-正文内容……
 ```
 
-字段说明：
+## Markdown 内部备注
 
-- `title`：公众号标题；缺省时使用正文第一个一级标题
-- `author`：作者；缺省时使用环境变量 `WECHAT_AUTHOR`
-- `digest`：摘要；缺省时从正文首段截取。代码会按 UTF-8 字节自动截断到 120B 内；手写摘要建议控制在 35 个中文左右，避免微信返回 `45004 description size out of limit`
-- `cover_media_id`：单篇文章封面素材 ID；缺省时使用 `WECHAT_THUMB_MEDIA_ID`
-- `content_source_url`：原文链接，可留空
-- `need_open_comment`：是否打开评论，`0` 或 `1`
-- `only_fans_can_comment`：是否仅粉丝可评论，`0` 或 `1`
-- `show_cover_pic`：正文是否展示封面，`0` 或 `1`
+以下二级标题开头的章节只保留在 Markdown 源文件里，生成微信公众号草稿时会自动过滤，不进入正文：
 
-## 注意事项
-
-- 公众号发布接口要求公众号已开通对应能力，并且服务器 IP / 调用环境符合微信后台配置。
-- `WECHAT_THUMB_MEDIA_ID` 需要是已上传到公众号素材库的图片素材 ID。
-- 定时任务使用 UTC cron，当前配置 `30 23 * * *` 对应北京时间第二天 07:30。
-- 本项目不会生成封面图；封面素材上传流程可后续扩展。
+- `## 发布备注`
+- `## 备注`
+- `## 内部备注`
+- `## 草稿备注`
+- `## Notes`
+- `## Publishing Notes`
