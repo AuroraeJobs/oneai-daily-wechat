@@ -1,6 +1,6 @@
 ---
 title: "OneAI Daily｜今日AI要闻"
-wechat_title: "AI 公司法、视频融资与无人机热潮"
+wechat_title: "OneAI Daily｜AI 公司法、视频融资与无人机热潮"
 cover: "assets/2026-07-04/cover.png"
 date: "2026-07-04"
 digest: "今日AI要闻"
