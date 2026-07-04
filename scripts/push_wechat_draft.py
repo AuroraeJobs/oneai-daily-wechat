@@ -137,8 +137,8 @@ def is_svg_path(path: Path) -> bool:
 def get_image_mime(path: Path) -> str:
     if is_svg_path(path):
         raise WeChatError(
-            "SVG cover images are disabled for WeChat publishing. "
-            "Use a generated per-issue PNG cover in front matter."
+            "SVG images should not be uploaded directly. "
+            "Generate and upload the same-name PNG instead."
         )
     mime, _ = mimetypes.guess_type(path.name)
     if mime not in {"image/jpeg", "image/png", "image/gif", "image/bmp"}:
@@ -148,6 +148,10 @@ def get_image_mime(path: Path) -> str:
 
 def prepare_body_image_for_upload(image_path: Path, temp_dir: Path) -> Path:
     if is_svg_path(image_path):
+        sibling_png = image_path.with_suffix(".png")
+        if sibling_png.exists():
+            print(f"using generated PNG for SVG body image: {sibling_png.relative_to(REPO_ROOT)}")
+            return sibling_png
         png_path = temp_dir / f"{image_path.stem}.png"
         cairosvg.svg2png(url=str(image_path), write_to=str(png_path), output_width=1200, output_height=675)
         return png_path
@@ -231,7 +235,7 @@ def replace_markdown_images(article: Article, access_token: str) -> str:
             if ref not in image_cache:
                 upload_path = prepare_body_image_for_upload(local_path, temp_dir)
                 image_cache[ref] = upload_body_image(access_token, upload_path)
-                action = "converted and uploaded SVG body image" if is_svg_path(local_path) else "uploaded body image"
+                action = "uploaded generated PNG for SVG body image" if is_svg_path(local_path) else "uploaded body image"
                 print(f"{action}: {ref} -> {image_cache[ref]}")
             return f"![{alt}]({image_cache[ref]})"
 
