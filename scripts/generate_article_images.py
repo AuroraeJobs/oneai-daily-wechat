@@ -135,9 +135,12 @@ def draw_gradient(draw_img: Image.Image, c1: tuple[int, int, int], c2: tuple[int
 
 
 def draw_background_accents(draw: ImageDraw.ImageDraw) -> None:
-    draw.ellipse((760, 110, 1240, 590), fill=(255, 255, 255, 10))
-    draw.ellipse((940, 20, 1240, 320), fill=(255, 255, 255, 8))
-    draw.line((86, 500, 1080, 500), fill=(255, 255, 255, 55), width=3)
+    # Keep the right side visually balanced without large opaque shapes.
+    line_color = (235, 245, 255)
+    for offset, alpha_width in ((0, 2), (42, 1), (84, 1)):
+        draw.line((760 + offset, 120, 1110 + offset, 555), fill=line_color, width=alpha_width)
+    for x, y, r in ((930, 165, 5), (1000, 245, 4), (1080, 365, 5), (880, 455, 3)):
+        draw.ellipse((x - r, y - r, x + r, y + r), fill=(235, 245, 255))
 
 
 def make_cover(path: Path, title: str):
