@@ -12,5 +12,12 @@
   <text x="86" y="300" font-family="Arial, 'Noto Sans CJK SC', sans-serif" font-size="58" font-weight="800" fill="#ffffff">Argentina floats</text>
   <text x="86" y="370" font-family="Arial, 'Noto Sans CJK SC', sans-serif" font-size="58" font-weight="800" fill="#ffffff">AI-run companies</text>
   <text x="88" y="442" font-family="Arial, 'Noto Sans CJK SC', sans-serif" font-size="32" fill="#e1eeff">Human oversight remains the hinge</text>
+  <g transform="translate(860 178)" opacity="0.92">
+    <rect x="0" y="0" width="220" height="220" rx="28" fill="#ffffff" opacity="0.14"/>
+    <rect x="42" y="58" width="110" height="124" rx="14" fill="none" stroke="#ffffff" stroke-width="8"/>
+    <path d="M62 92h70M62 122h70M62 152h48" stroke="#ffffff" stroke-width="8" stroke-linecap="round"/>
+    <circle cx="162" cy="74" r="34" fill="none" stroke="#ffffff" stroke-width="8"/>
+    <text x="142" y="84" font-family="Arial, sans-serif" font-size="30" font-weight="800" fill="#ffffff">AI</text>
+  </g>
   <text x="86" y="582" font-family="Arial, 'Noto Sans CJK SC', sans-serif" font-size="28" font-weight="700" fill="#deeeff">Understand AI. Understand the World.</text>
 </svg>
