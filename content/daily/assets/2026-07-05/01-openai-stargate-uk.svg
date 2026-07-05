@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="675" viewBox="0 0 1200 675">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#082048"/><stop offset="1" stop-color="#1a6bd7"/></linearGradient>
+  </defs>
+  <rect width="1200" height="675" fill="url(#g)"/>
+  <path d="M760 120 L1110 555 M802 120 L1152 555 M844 120 L1194 555" stroke="#eaf4ff" stroke-width="2" opacity=".65"/>
+  <circle cx="935" cy="165" r="6" fill="#eaf4ff" opacity=".82"/>
+  <circle cx="1000" cy="245" r="4" fill="#eaf4ff" opacity=".82"/>
+  <text x="86" y="136" font-family="PingFang SC, Noto Sans CJK SC, Arial" font-size="34" font-weight="700" fill="#dceeff">ONEAI DAILY</text>
+  <text x="86" y="330" font-family="PingFang SC, Noto Sans CJK SC, Arial" font-size="68" font-weight="700" fill="#fff">OpenAI 英国数据中心</text>
+  <text x="86" y="415" font-family="PingFang SC, Noto Sans CJK SC, Arial" font-size="68" font-weight="700" fill="#fff">投资疑云</text>
+</svg>
