@@ -259,7 +259,7 @@ def style_anchor(anchor, standalone: bool = False) -> None:
         anchor["style"] = (
             "display:block;margin:10px 0 0;padding:8px 12px;border-radius:12px;"
             "background:#eef5ff;color:#0d63f2;text-decoration:none;font-size:14px;"
-            "line-height:1.6;font-weight:700;text-align:center;"
+            "line-height:1.75;font-weight:400;text-align:center;"
         )
     else:
         anchor["style"] = (
@@ -282,7 +282,7 @@ def prettify_source_links(soup: BeautifulSoup) -> None:
         card = soup.new_tag("section")
         card["style"] = (
             "margin:14px 0 18px;padding:10px 12px;border-radius:12px;"
-            "background:#f6f9ff;color:#5c6f91;"
+            "background:#f6f9ff;color:#5c6f91;font-size:14px;"
         )
 
         info = soup.new_tag("p")
