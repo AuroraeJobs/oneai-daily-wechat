@@ -109,16 +109,6 @@ def strip_first_h1(md_text: str) -> str:
     return re.sub(r"^#\s+.+(?:\n+)?", "", md_text.lstrip(), count=1)
 
 
-def first_source_url(article: Article) -> str:
-    explicit = str(article.metadata.get("content_source_url") or article.metadata.get("source_url") or "").strip()
-    if explicit.startswith(("http://", "https://")):
-        return explicit
-    match = URL_RE.search(article.body)
-    if not match:
-        return ""
-    return match.group(0).rstrip("。，,)")
-
-
 def request_json(method: str, url: str, **kwargs) -> dict:
     response = requests.request(method, url, timeout=60, **kwargs)
     try:
@@ -279,7 +269,6 @@ def prettify_source_links(soup: BeautifulSoup) -> None:
         if not match or "来源" not in text:
             continue
 
-        url = match.group(0).rstrip("。，,)")
         source_text = normalize_source_text(text)
 
         card = soup.new_tag("section")
@@ -297,18 +286,6 @@ def prettify_source_links(soup: BeautifulSoup) -> None:
         if source_text:
             info.append(source_text)
         card.append(info)
-
-        source_url = soup.new_tag("p")
-        source_url["style"] = (
-            "font-size:14px;line-height:1.75;margin:8px 0 0;color:#5c6f91;"
-            "word-break:break-all;overflow-wrap:anywhere;"
-        )
-        source_label = soup.new_tag("span")
-        source_label["style"] = "font-weight:700;color:#31415f;"
-        source_label.string = "原文链接："
-        source_url.append(source_label)
-        source_url.append(url)
-        card.append(source_url)
 
         p.replace_with(card)
 
@@ -357,7 +334,7 @@ def create_draft(access_token: str, article: Article, content_html: str, thumb_m
                 "author": metadata.get("author") or os.getenv("AUTHOR", "OneAI Daily"),
                 "digest": (metadata.get("digest") or "今日5条")[:54],
                 "content": content_html,
-                "content_source_url": first_source_url(article),
+                "content_source_url": "",
                 "thumb_media_id": thumb_media_id,
                 "need_open_comment": int(os.getenv("NEED_OPEN_COMMENT", "0")),
                 "only_fans_can_comment": int(os.getenv("ONLY_FANS_CAN_COMMENT", "0")),
