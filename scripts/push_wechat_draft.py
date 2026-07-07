@@ -109,6 +109,16 @@ def strip_first_h1(md_text: str) -> str:
     return re.sub(r"^#\s+.+(?:\n+)?", "", md_text.lstrip(), count=1)
 
 
+def first_source_url(article: Article) -> str:
+    explicit = str(article.metadata.get("content_source_url") or article.metadata.get("source_url") or "").strip()
+    if explicit.startswith(("http://", "https://")):
+        return explicit
+    match = URL_RE.search(article.body)
+    if not match:
+        return ""
+    return match.group(0).rstrip("。，,)")
+
+
 def request_json(method: str, url: str, **kwargs) -> dict:
     response = requests.request(method, url, timeout=60, **kwargs)
     try:
@@ -251,22 +261,15 @@ def normalize_source_text(text: str) -> str:
     return text.strip(" ，。,;；")
 
 
-def style_anchor(anchor, standalone: bool = False) -> None:
+def style_anchor(anchor) -> None:
     label = anchor.get_text(strip=True)
     if not label or URL_RE.fullmatch(label):
         anchor.string = "阅读原文"
-    if standalone:
-        anchor["style"] = (
-            "display:block;margin:10px 0 0;padding:8px 12px;border-radius:12px;"
-            "background:#eef5ff;color:#0d63f2;text-decoration:none;font-size:14px;"
-            "line-height:1.75;font-weight:400;text-align:center;"
-        )
-    else:
-        anchor["style"] = (
-            "display:inline-block;margin-left:6px;padding:2px 9px;border-radius:999px;"
-            "background:#eef5ff;color:#0d63f2;text-decoration:none;font-size:13px;"
-            "line-height:1.6;font-weight:600;"
-        )
+    anchor["style"] = (
+        "display:inline-block;margin-left:6px;padding:2px 9px;border-radius:999px;"
+        "background:#eef5ff;color:#0d63f2;text-decoration:none;font-size:13px;"
+        "line-height:1.6;font-weight:600;"
+    )
 
 
 def prettify_source_links(soup: BeautifulSoup) -> None:
@@ -295,17 +298,21 @@ def prettify_source_links(soup: BeautifulSoup) -> None:
             info.append(source_text)
         card.append(info)
 
-        anchor = soup.new_tag("a", href=url, target="_blank")
-        anchor.string = "阅读原文"
-        anchor["data-oneai-source-link"] = "1"
-        style_anchor(anchor, standalone=True)
-        card.append(anchor)
+        source_url = soup.new_tag("p")
+        source_url["style"] = (
+            "font-size:14px;line-height:1.75;margin:8px 0 0;color:#5c6f91;"
+            "word-break:break-all;overflow-wrap:anywhere;"
+        )
+        source_label = soup.new_tag("span")
+        source_label["style"] = "font-weight:700;color:#31415f;"
+        source_label.string = "原文链接："
+        source_url.append(source_label)
+        source_url.append(url)
+        card.append(source_url)
 
         p.replace_with(card)
 
     for anchor in soup.find_all("a"):
-        if anchor.get("data-oneai-source-link") == "1":
-            continue
         style_anchor(anchor)
 
 
@@ -350,7 +357,7 @@ def create_draft(access_token: str, article: Article, content_html: str, thumb_m
                 "author": metadata.get("author") or os.getenv("AUTHOR", "OneAI Daily"),
                 "digest": (metadata.get("digest") or "今日5条")[:54],
                 "content": content_html,
-                "content_source_url": "",
+                "content_source_url": first_source_url(article),
                 "thumb_media_id": thumb_media_id,
                 "need_open_comment": int(os.getenv("NEED_OPEN_COMMENT", "0")),
                 "only_fans_can_comment": int(os.getenv("ONLY_FANS_CAN_COMMENT", "0")),
