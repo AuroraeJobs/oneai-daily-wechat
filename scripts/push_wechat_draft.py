@@ -45,6 +45,7 @@ DEFAULT_TEMPLATE = "templates/wechat.html"
 INTERNAL_NOTES_RE = re.compile(
     r"(?ms)^#{1,6}\s*(?:发布备注|备注|内部备注|草稿备注|Notes|Publishing Notes)\s*$.*\Z"
 )
+URL_RE = re.compile(r"https?://[^\s<]+")
 
 load_dotenv(REPO_ROOT / ".env", override=False)
 
@@ -243,6 +244,55 @@ def replace_markdown_images(article: Article, access_token: str) -> str:
         return re.sub(r"!\[([^\]]*)\]\(([^)]+)\)", repl, article.body)
 
 
+def normalize_source_text(text: str) -> str:
+    text = URL_RE.sub("", text)
+    text = re.sub(r"^\s*来源\s*[:：]\s*", "", text.strip())
+    text = re.sub(r"\s+", " ", text)
+    return text.strip(" ，。,;；")
+
+
+def style_anchor(anchor) -> None:
+    label = anchor.get_text(strip=True)
+    if not label or URL_RE.fullmatch(label):
+        anchor.string = "阅读原文"
+    anchor["style"] = (
+        "display:inline-block;margin-left:6px;padding:2px 9px;border-radius:999px;"
+        "background:#eef5ff;color:#0d63f2;text-decoration:none;font-size:13px;"
+        "line-height:1.6;font-weight:600;"
+    )
+
+
+def prettify_source_links(soup: BeautifulSoup) -> None:
+    for p in list(soup.find_all("p")):
+        text = p.get_text("\n", strip=True)
+        match = URL_RE.search(text)
+        if not match or "来源" not in text:
+            continue
+
+        url = match.group(0).rstrip("。，,)")
+        source_text = normalize_source_text(text)
+        p.clear()
+        p["style"] = (
+            "font-size:14px;line-height:1.75;margin:14px 0 18px;padding:10px 12px;"
+            "border-radius:12px;background:#f6f9ff;color:#5c6f91;"
+        )
+
+        label = soup.new_tag("span")
+        label["style"] = "font-weight:700;color:#31415f;"
+        label.string = "来源："
+        p.append(label)
+        if source_text:
+            p.append(source_text)
+
+        anchor = soup.new_tag("a", href=url, target="_blank")
+        anchor.string = "阅读原文"
+        style_anchor(anchor)
+        p.append(anchor)
+
+    for anchor in soup.find_all("a"):
+        style_anchor(anchor)
+
+
 def markdown_to_wechat_html(md_text: str) -> str:
     html = markdown.markdown(strip_first_h1(md_text), extensions=["extra", "sane_lists"])
     soup = BeautifulSoup(html, "html.parser")
@@ -258,6 +308,7 @@ def markdown_to_wechat_html(md_text: str) -> str:
         blockquote["style"] = "border-left:4px solid #0d63f2;padding-left:12px;color:#5c6f91;margin:16px 0;"
     for hr in soup.find_all("hr"):
         hr["style"] = "border:none;border-top:1px solid #e8eef8;margin:24px 0;"
+    prettify_source_links(soup)
     return str(soup)
 
 
