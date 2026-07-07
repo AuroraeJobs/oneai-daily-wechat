@@ -251,15 +251,22 @@ def normalize_source_text(text: str) -> str:
     return text.strip(" ，。,;；")
 
 
-def style_anchor(anchor) -> None:
+def style_anchor(anchor, standalone: bool = False) -> None:
     label = anchor.get_text(strip=True)
     if not label or URL_RE.fullmatch(label):
         anchor.string = "阅读原文"
-    anchor["style"] = (
-        "display:inline-block;margin-left:6px;padding:2px 9px;border-radius:999px;"
-        "background:#eef5ff;color:#0d63f2;text-decoration:none;font-size:13px;"
-        "line-height:1.6;font-weight:600;"
-    )
+    if standalone:
+        anchor["style"] = (
+            "display:block;margin:10px 0 0;padding:8px 12px;border-radius:12px;"
+            "background:#eef5ff;color:#0d63f2;text-decoration:none;font-size:14px;"
+            "line-height:1.6;font-weight:700;text-align:center;"
+        )
+    else:
+        anchor["style"] = (
+            "display:inline-block;margin-left:6px;padding:2px 9px;border-radius:999px;"
+            "background:#eef5ff;color:#0d63f2;text-decoration:none;font-size:13px;"
+            "line-height:1.6;font-weight:600;"
+        )
 
 
 def prettify_source_links(soup: BeautifulSoup) -> None:
@@ -271,25 +278,34 @@ def prettify_source_links(soup: BeautifulSoup) -> None:
 
         url = match.group(0).rstrip("。，,)")
         source_text = normalize_source_text(text)
-        p.clear()
-        p["style"] = (
-            "font-size:14px;line-height:1.75;margin:14px 0 18px;padding:10px 12px;"
-            "border-radius:12px;background:#f6f9ff;color:#5c6f91;"
+
+        card = soup.new_tag("section")
+        card["style"] = (
+            "margin:14px 0 18px;padding:10px 12px;border-radius:12px;"
+            "background:#f6f9ff;color:#5c6f91;"
         )
 
+        info = soup.new_tag("p")
+        info["style"] = "font-size:14px;line-height:1.75;margin:0;color:#5c6f91;"
         label = soup.new_tag("span")
         label["style"] = "font-weight:700;color:#31415f;"
         label.string = "来源："
-        p.append(label)
+        info.append(label)
         if source_text:
-            p.append(source_text)
+            info.append(source_text)
+        card.append(info)
 
         anchor = soup.new_tag("a", href=url, target="_blank")
         anchor.string = "阅读原文"
-        style_anchor(anchor)
-        p.append(anchor)
+        anchor["data-oneai-source-link"] = "1"
+        style_anchor(anchor, standalone=True)
+        card.append(anchor)
+
+        p.replace_with(card)
 
     for anchor in soup.find_all("a"):
+        if anchor.get("data-oneai-source-link") == "1":
+            continue
         style_anchor(anchor)
 
 
