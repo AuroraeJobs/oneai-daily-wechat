@@ -1,9 +1,9 @@
 ---
 title: "OneAI Daily｜今日AI要闻"
-wechat_title: "OneAI Daily｜AI代理、商业化与全球治理"
+wechat_title: "OneAI Daily｜GPT-5.6、AI芯片与细胞模型"
 cover: "assets/2026-07-10/cover.png"
 date: "2026-07-10"
-digest: "AI代理商业化"
+digest: "模型芯片科学"
 source: "manual-curated"
 content_source_url: ""
 topics:
@@ -16,77 +16,77 @@ topics:
   - engineering
 image_mode: "generated-card"
 hero_images:
-  - content/daily/assets/2026-07-10/01-ai-agent-trust.png
-  - content/daily/assets/2026-07-10/02-meta-ai-revenue.png
-  - content/daily/assets/2026-07-10/03-ai-investment-market.png
-  - content/daily/assets/2026-07-10/04-mistral-robotics.png
-  - content/daily/assets/2026-07-10/05-ai-governance.png
+  - content/daily/assets/2026-07-10/01-openai-gpt56-chatgpt-work.png
+  - content/daily/assets/2026-07-10/02-meta-iris-ai-chip.png
+  - content/daily/assets/2026-07-10/03-apple-eu-dma-ruling.png
+  - content/daily/assets/2026-07-10/04-nature-cell-foundation-model.png
+  - content/daily/assets/2026-07-10/05-general-intuition-robotics.png
 ---
 
 # OneAI Daily｜今日AI要闻
 
-## 1. 治理｜联合国机构启动 AI Agent 信任标准计划
+## 1. 产品｜OpenAI 发布 GPT-5.6，并把 ChatGPT 推向“工作代理”
 
-![AI agent trust](assets/2026-07-10/01-ai-agent-trust.png)
+![OpenAI GPT-5.6 and ChatGPT Work](assets/2026-07-10/01-openai-gpt56-chatgpt-work.png)
 
-国际电信联盟（ITU）7 月 9 日在 AI for Good Summit 上启动 AI Agent 信任计划，目标是建立关于 AI 代理身份识别、可靠性和人类监督的国际框架。重点关注能够自主执行任务、交易和决策的新一代 AI 系统。
+OpenAI 7 月 9 日宣布 GPT-5.6 系列进入通用可用阶段，包括旗舰模型 Sol、日常工作模型 Terra 和更低成本模型 Luna。同日推出的 ChatGPT Work 把 Codex 能力、桌面应用、本地文件、浏览器和插件连接到同一个代理式工作流中，目标是让 ChatGPT 不只回答问题，而是持续数小时完成文档、表格、幻灯片、网站和跨应用任务。
 
-**为什么重要：** AI 正从回答问题走向代表用户行动。未来企业和消费者需要的不只是模型能力，还包括代理权限管理、责任追踪和安全边界；信任基础设施可能成为 Agent 时代的关键层。
+**为什么重要：** 这标志着前沿模型竞争从“更会聊天”转向“更会交付”。如果模型能以更低 token、延迟和成本完成长链路任务，AI 的商业价值会更多体现在工作流替代、团队协作和企业治理，而不是单次问答能力。
 
-**来源：** Reuters, “UN digital tech agency launches initiative to improve trust in AI agents”, 2026-07-09.
-
----
-
-## 2. 商业化｜Meta 开始通过 AI 模型 API 直接变现
-
-![Meta AI revenue](assets/2026-07-10/02-meta-ai-revenue.png)
-
-Axios 7 月 9 日报道，Meta 开始通过 API 向开发者提供 Muse Spark 1.1 模型访问，这是公司大型 AI 基建投入后的首次公开模型商业化动作。Meta 已投入大量资源建设 AI 基础设施，并计划通过企业服务和开发者生态获得回报。
-
-**为什么重要：** AI 竞争正在从“谁拥有最强模型”转向“谁能把模型变成收入”。Meta 拥有社交分发渠道和广告生态，如果 AI 服务能够形成商业闭环，可能改变大模型公司的竞争格局。
-
-**来源：** Axios, “Meta's AI revenue plan”, 2026-07-09.
+**来源：** OpenAI, “GPT-5.6: Frontier intelligence that scales with your ambition”, 2026-07-09; OpenAI, “ChatGPT is now a partner for your most ambitious work”, 2026-07-09.
 
 ---
 
-## 3. 市场｜投资者重新评估 AI 受益链
+## 2. 芯片｜Meta 自研 Iris AI 芯片计划 9 月投产
 
-![AI investment market](assets/2026-07-10/03-ai-investment-market.png)
+![Meta Iris AI chip](assets/2026-07-10/02-meta-iris-ai-chip.png)
 
-Reuters 7 月 9 日报道，亚洲投资者开始寻找既受益于 AI 又能抵抗 AI 重塑风险的企业。部分投资机构减少单纯追逐前端模型，而转向数据中心、液冷、电力和基础设施等更底层机会，同时关注 AI 估值是否已经过热。
+Reuters 7 月 9 日报道，Meta 计划在 2026 年 9 月开始生产自研 AI 芯片 Iris。该芯片属于 MTIA 项目，由 Broadcom 参与设计、TSMC 负责制造；报道还提到 Meta 希望到 2027 年把总算力容量从约 7 吉瓦提升到 14 吉瓦。
 
-**为什么重要：** AI 投资正在从单一赢家逻辑转向产业链分化。未来价值可能更多来自算力基础设施、能源效率和真实业务应用，而不仅是模型规模。
+**为什么重要：** AI 巨头正在把竞争推进到硅片层。自研加速器并不会立刻摆脱 Nvidia 和 AMD，但能让平台公司在推理成本、供应链节奏、模型架构和数据中心规划上拥有更大主动权，也会继续推高先进制程、HBM、封装和电力资源的战略价值。
 
-**来源：** Reuters, “Asian investors eye firms benefiting from but resilient to AI”, 2026-07-09.
-
----
-
-## 4. 工程｜Physical AI 加速进入工业场景
-
-![Mistral robotics](assets/2026-07-10/04-mistral-robotics.png)
-
-Mistral AI 推出机器人模型后，欧洲 Physical AI 竞争进一步升温。该方向试图把语言模型能力连接到机器人感知、规划和执行系统，用于工厂、仓储和自动化生产环境。
-
-**为什么重要：** AI 的下一阶段不仅发生在屏幕里，也发生在现实世界。机器人基础模型将推动软件智能与制造设备结合，但安全、可靠性和部署成本仍是规模化关键。
-
-**来源：** Reuters, “Mistral launches first robotics model in physical AI push”, 2026-07-08.
+**来源：** Reuters, “Meta to start production of Iris AI chip in September 2026”, 2026-07-09; Investor’s Business Daily, “Meta Stock Jumps As AI Battle Heats Up. Zuckerberg Says Cloud Business ‘Make Sense.’”, 2026-07-09.
 
 ---
 
-## 5. 政策｜AI Agent 监管进入国际协调阶段
+## 3. 政策｜Apple 在欧盟 DMA 诉讼中败诉
 
-![AI governance](assets/2026-07-10/05-ai-governance.png)
+![Apple EU DMA ruling](assets/2026-07-10/03-apple-eu-dma-ruling.png)
 
-随着 AI Agent 能够执行日程安排、金融交易和企业流程，全球监管机构开始关注如何确保这些系统可识别、可审计并保持人工控制。联合国和国际组织正在推动跨国标准讨论。
+The Wall Street Journal 7 月 9 日报道，欧盟普通法院驳回 Apple 对欧盟委员会决定的上诉，维持将 iOS 和 App Store 纳入《数字市场法案》监管范围的判断。这意味着 Apple 仍需按“守门人”规则开放更多竞争接口，并接受对应用分发、支付和平台控制权的更严格约束。
 
-**为什么重要：** Agent 时代的监管重点将从“模型输出是否正确”扩展到“模型是否有权行动”。这会影响金融、医疗、企业软件等高风险行业的 AI 采用速度。
+**为什么重要：** 平台监管正在直接改变移动生态的商业结构。对开发者和替代应用商店而言，这可能打开新的分发空间；对 Apple 而言，隐私、安全和商业抽成之间的平衡会被持续重写，也为其他司法辖区监管 Big Tech 提供参照。
 
-**来源：** Reuters, “UN digital tech agency launches initiative to improve trust in AI agents”, 2026-07-09.
+**来源：** The Wall Street Journal, “Apple Loses Court Battle Over iOS and App Store Under EU’s Tech Rules”, 2026-07-09.
+
+---
+
+## 4. 科学｜Nature 发表细胞生物学 foundation model UCE
+
+![Nature cell foundation model](assets/2026-07-10/04-nature-cell-foundation-model.png)
+
+Nature 7 月 8 日发表论文介绍 Universal Cell Embedding（UCE），一个面向单细胞基因表达数据的 foundation model。研究团队用自监督方式训练模型，将 36 million 个细胞、1000 多个命名细胞类型、数百个实验、数十种组织和 8 个物种嵌入到统一空间；模型还能在无需标注、微调或重新训练的情况下处理新细胞与新物种数据。
+
+**为什么重要：** 生物 AI 正从“为单个任务训练模型”走向“构建通用表征层”。如果 UCE 这类模型能够可靠跨数据集、组织和物种工作，细胞图谱、疾病机制、药物靶点和实验假设生成都会更接近可复用的基础设施，而不是一次性分析项目。
+
+**来源：** Nature, “Universal cell embedding provides a foundation model for cell biology”, 2026-07-08.
+
+---
+
+## 5. 创业｜General Intuition 押注用游戏数据训练 embodied AI
+
+![General Intuition robotics](assets/2026-07-10/05-general-intuition-robotics.png)
+
+TechCrunch 7 月 8 日报道，General Intuition CEO Pim de Witte 认为机器人行业会出现类似 GPT-3 之后 NLP 的转折：企业不再为每个机器人和场景从零训练专用模型，而是基于能理解空间、时间、动作和交互的通用模型做迁移。该公司使用数百万小时游戏数据及玩家操作信息训练模型，试图让 embodied AI 在真实机器人和仿真环境之间迁移。
+
+**为什么重要：** 机器人商业化的最大瓶颈不是演示，而是泛化与数据成本。如果游戏和交互数据能为 physical AI 提供更便宜、更可扩展的“世界模型”训练路径，仓储、无人机、工业自动化和人形机器人公司都会重新评估数据资产、仿真平台和模型 API 的价值。
+
+**来源：** TechCrunch, “This startup thinks robotics is about to have its ChatGPT moment”, 2026-07-08.
 
 ---
 
 ## 发布备注
 
-- digest 已控制在 10 个中文字符以内：`AI代理商业化`
+- digest 已控制在 10 个中文字符以内：`模型芯片科学`
 - 正文已按当前公众号模式处理：只显示来源信息，不显示裸链接，不放每条新闻的阅读原文按钮，`content_source_url` 保持为空。
 - 图片引用为生成式 PNG 卡片路径，可由本地发布脚本自动生成。
